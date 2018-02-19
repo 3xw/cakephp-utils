@@ -1,0 +1,23 @@
+{
+  "name": "3xw/cakephp-utils",
+  "description": "CakePHP utils plugins",
+  "type": "cakephp-plugin",
+  "require": {
+    "php": ">=5.5.9",
+    "cakephp/cakephp": "^3.4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Trois\\Utils\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Trois\\Utils\\Test\\": "tests",
+      "Cake\\Test\\": "./vendor/cakephp/cakephp/tests"
+    }
+  }
+}
