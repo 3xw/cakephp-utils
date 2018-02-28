@@ -4,7 +4,8 @@
   "type": "cakephp-plugin",
   "require": {
     "php": ">=5.5.9",
-    "cakephp/cakephp": "^3.5"
+    "cakephp/cakephp": "^3.5",
+    "firebase/php-jwt": "~5.0",
   },
   "require-dev": {
     "phpunit/phpunit": "*"

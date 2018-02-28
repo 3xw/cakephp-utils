@@ -43,8 +43,8 @@ class LegacyTokenAuthenticate extends BaseAuthenticate
   		if (empty($user)) {
   			return false;
   		}
-      $role = $user['role'];
-      $user['role'] = $role['name'];
+      //$role = $user['role'];
+      //$user['role'] = $role['name'];
       return $user;
     }
 
