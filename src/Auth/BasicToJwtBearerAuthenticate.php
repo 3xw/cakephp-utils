@@ -13,11 +13,17 @@ use Cake\Auth\BasicAuthenticate AS CakeBasicAuthenticate;
 
 class BasicToJwtBearerAuthenticate extends CakeBasicAuthenticate
 {
+  protected $_defaultConfig = [
+    'field' => 'id',
+    'duration' => 3600,
+    'headerKey' => 'X-Token'
+  ];
+
   public function afterIdentify(Event $event, array $user)
   {
-  $token = JWT::encode(['sub' => $user['id'], 'exp' =>  time() + 3600/*$event->getSubject()->config()['storage']['redis']['duration']*/], Security::salt());
-    $event->getSubject()->response = $event->getSubject()->response->withHeader('X-Token', $token);
-    $user['X-Token'] = $token;
+  $token = JWT::encode(['sub' => $user[$this->config('field')], 'exp' =>  time() + $this->config('duration')], Security::salt());
+    $event->getSubject()->response = $event->getSubject()->response->withHeader($this->config('headerKey'), $token);
+    $user[$this->config('headerKey')] = $token;
     $event->result = $user;
   }
 
