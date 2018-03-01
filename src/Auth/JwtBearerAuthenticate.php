@@ -19,24 +19,20 @@ class JwtBearerAuthenticate extends CakeBasicAuthenticate
 
   protected $_error;
 
-  public function __construct(ComponentRegistry $registry, $config)
-  {
-    $this->config([
-      'header' => 'authorization',
-      'prefix' => 'bearer',
-      'parameter' => 'token',
-      'queryDatasource' => true,
-      'fields' => ['username' => 'id'],
-      'unauthenticatedException' => '\Cake\Network\Exception\UnauthorizedException',
-      'key' => null,
-    ]);
-
-    if (empty($config['allowedAlgs'])) {
-      $config['allowedAlgs'] = ['HS256'];
-    }
-
-    parent::__construct($registry, $config);
-  }
+  protected $_defaultConfig = [
+    'userModel' => 'Users',
+    'header' => 'authorization',
+    'prefix' => 'bearer',
+    'parameter' => 'token',
+    'queryDatasource' => true,
+    'fields' => [
+      'username' => 'id',
+      'password' => 'password'
+    ],
+    'unauthenticatedException' => '\Cake\Network\Exception\UnauthorizedException',
+    'key' => null,
+    'allowedAlgs' => ['HS256']
+  ];
 
   public function unauthenticated(ServerRequest $request, Response $response)
   {
