@@ -14,21 +14,28 @@ Load it in your config/boostrap.php
 	Plugin::load('Trois/Utils');
 
 ## Model
+
 ### Behaviors
+
  - Sluggable Behavior
  - Translate Behavior
  
 ### Rules
+
  - IsUniqueTranslationRule
 
-## Shell
+## Shell
+
  - MissingTranslations
 
 ## View
+
  - LngSwitchCell
 
 ## Security
+
 ### CORS
+
 in your src/Application.php add following:
 	
 	use Trois\Utils\Middleware\CorsMiddleware;
