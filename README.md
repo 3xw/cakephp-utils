@@ -43,7 +43,24 @@ in your src/Application.php add following:
 	public function middleware($middlewareQueue)
 	{
 		$middlewareQueue
-		->add(CorsMiddleware::class)
+		->add(new CorsMiddleware::class)
+		
+		/* -- OR  -- */
+		->add(new CorsMiddleware([
+		
+			// thoses are default options
+		    'all' => [
+		      'Access-Control-Allow-Origin' => '*',
+		      'Access-Control-Allow-Credentials' => 'true',
+		      'Access-Control-Expose-Headers' => 'X-Token',
+		      'Access-Control-Max-Age' => '86400'
+		    ],
+		    'options' => [
+		      'methods' => 'GET, POST, OPTIONS, PUT, DELETE'
+		    ]
+	    
+	  	]))
+	  	
 		...
 	}
 
