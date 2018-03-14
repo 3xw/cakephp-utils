@@ -12,8 +12,35 @@ The recommended way to install composer packages is:
 Load it in your config/boostrap.php
 
 	Plugin::load('Trois/Utils');
+
+## Model
+### Behaviors
+ - Sluggable Behavior
+ - Translate Behavior
+ 
+### Rules
+ - IsUniqueTranslationRule
+
+## Shell
+ - MissingTranslations
+
+## View
+ - LngSwitchCell
+
+## Security
+### CORS
+in your src/Application.php add following:
 	
-## Auth
+	use Trois\Utils\Middleware\CorsMiddleware;
+	...
+	public function middleware($middlewareQueue)
+	{
+		$middlewareQueue
+		->add(CorsMiddleware::class)
+		...
+	}
+
+### Auth
 Config example:
 
 config/bootsrap.php
