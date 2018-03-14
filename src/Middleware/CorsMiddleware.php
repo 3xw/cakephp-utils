@@ -40,6 +40,7 @@ class CorsMiddleware
     if (isset($_SERVER['HTTP_ORIGIN'])) {
       $response = $response->withHeader('Access-Control-Allow-Origin', $_SERVER['HTTP_ORIGIN'])     // or '*'
       ->withHeader('Access-Control-Allow-Credentials', 'true')
+      ->withHeader('Access-Control-Expose-Headers', 'X-Token')
       //->withHeader('Access-Control-Max-Age', '0');    // no cache
       ->withHeader('Access-Control-Max-Age', '86400');    // cache for 1 day
     }
