@@ -8,7 +8,8 @@ use Cake\Network\Request;
 use Cake\Network\Response;
 use Cake\Utility\Security;
 use Cake\Http\ServerRequest;
-use Exception;
+use Firebase\JWT\ExpiredException;
+use Cake\Network\Exception\UnauthorizedException;
 use Firebase\JWT\JWT;
 
 class JwtBearerAuthenticate extends CakeBasicAuthenticate
@@ -109,11 +110,8 @@ class JwtBearerAuthenticate extends CakeBasicAuthenticate
       $payload = JWT::decode($token, $config['key'] ?: Security::salt(), $config['allowedAlgs']);
 
       return $payload;
-    } catch (Exception $e) {
-      if (Configure::read('debug')) {
-        throw $e;
-      }
-      $this->_error = $e;
+    } catch (ExpiredException $e) {
+      throw new UnauthorizedException($e->getMessage());  
     }
   }
 }

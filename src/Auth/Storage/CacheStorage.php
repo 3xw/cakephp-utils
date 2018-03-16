@@ -7,6 +7,8 @@ use Cake\Cache\Cache;
 use Cake\Core\InstanceConfigTrait;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
+use Firebase\JWT\ExpiredException;
+use Cake\Network\Exception\UnauthorizedException;
 use Cake\Auth\Storage\MemoryStorage;
 
 class CacheStorage extends MemoryStorage
@@ -80,11 +82,8 @@ class CacheStorage extends MemoryStorage
     try {
       $payload = JWT::decode($token, $this->_config['token']['key'] ?: Security::salt(), $this->_config['token']['allowedAlgs']);
       return $payload;
-    } catch (Exception $e) {
-      if (Configure::read('debug')) {
-        throw $e;
-      }
-      $this->_error = $e;
+    } catch (ExpiredException $e) {
+      throw new UnauthorizedException($e->getMessage());
     }
   }
 }
