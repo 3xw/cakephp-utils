@@ -23,6 +23,7 @@ class SluggableBehavior extends Behavior
   */
   protected $_defaultConfig = [
     'field' => 'title',
+    'fields' => [],
     'slug' => 'slug',
     'replacement' => '-',
     'max_length' => 255,
@@ -43,25 +44,28 @@ class SluggableBehavior extends Behavior
   {
     $config = $this->config();
     $slug = $config['slug'];
-    $field = $config['field'];
+    $fields = (empty($config['fields']))? [$config['field']]: $config['fields'];
 
     if(empty($entity->get($slug)))
     {
-      $this->slug($event, $entity, $field, $slug);
+      $this->slug($event, $entity, $fields, $slug);
     }
   }
 
-  public function slug(Event $event, EntityInterface $entity, $field, $slug)
+  public function slug(Event $event, EntityInterface $entity, $fields, $slug)
   {
     $config = $this->config();
-
-    if(empty($entity->get($field)))
-    {
-      $event->stopPropagation();
-      $entity->errors($field,['Slug behavior needs a non empty field to create slug']);
+    $value = '';
+    foreach ( $fields as $field) {
+      if(empty($entity->get($field)))
+      {
+        $event->stopPropagation();
+        return $entity->errors($field,['Slug behavior needs a non empty field to create slug']);
+      }
+      $value .= $entity->get($field).' ';
     }
 
-    $value = $entity->get($field);
+    $value = substr($value, 0, -1);
     $id = empty($entity->get('id'))? -1 : $entity->get('id');
     $entity->set($slug, $this->_generate_slug($id, $value));
 
