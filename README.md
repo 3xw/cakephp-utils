@@ -34,7 +34,53 @@ Load it in your config/boostrap.php
 
 ## Security
 
-### CORS
+### GUARD Component
+This component allows you to check constructed request object and clean it if needed...
+
+
+in your src/Controller/AppController.php add following:
+
+	public function initialize()
+  	{
+	    parent::initialize();
+	
+	    ...
+	    
+	    // Auth
+	    $this->loadComponent('Auth', [...]);
+	
+	    // Guard
+	    $this->loadComponent('Trois/Utils.Guard',[
+	      'autoload_configs' => [
+	        'Guard.requestBody' => 'guard_request_body'
+	      ]
+	    ]);
+	    
+	    ...
+  	}
+  	
+in config/guard\_request\_body.php
+
+		<?php
+		use Cake\Http\ServerRequest;
+		
+		return [
+		  'Guard.requestBody' => [
+		    [
+		      'role' => '*',
+		      'prefix' => 'Book',
+		      'controller' => ['Users','Subscriptions'],
+		      'action' => ['register','registerAndBook'],
+		      'method' => ['POST','PUT'],
+		      'rule' => function(array $user, $role, ServerRequest $request)
+		      {
+		        // magic here... manipulate request here
+		      }
+		    ],
+		]];
+
+
+### CORS Middleware
 
 in your src/Application.php add following:
 	
@@ -64,7 +110,7 @@ in your src/Application.php add following:
 		...
 	}
 
-### Auth
+### Auth tools
 Config example:
 
 config/bootsrap.php
