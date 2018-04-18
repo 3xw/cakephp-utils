@@ -8,7 +8,7 @@ use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\Event\Event;
 use Cake\Utility\Security;
-use Cake\Network\Exception\UnauthorizedException;
+use Cake\Http\Exception\UnauthorizedException;
 use Cake\Auth\FormAuthenticate;
 
 class TwoFactorAuthenticate extends FormAuthenticate

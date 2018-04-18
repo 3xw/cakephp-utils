@@ -8,7 +8,8 @@ use Cake\Core\InstanceConfigTrait;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Firebase\JWT\ExpiredException;
-use Cake\Network\Exception\UnauthorizedException;
+use Firebase\JWT\SignatureInvalidException;
+use Cake\Http\Exception\UnauthorizedException;
 use Cake\Auth\Storage\MemoryStorage;
 
 class CacheStorage extends MemoryStorage
@@ -63,15 +64,15 @@ class CacheStorage extends MemoryStorage
   {
     if (!$request) return;
 
-    $header = $request->header($this->_config['token']['header']);
-    if ($header && stripos($header, $this->_config['token']['prefix']) === 0)
+    $header = $request->getHeader($this->_config['token']['header']);
+    if (!empty($header) && stripos($header[0], $this->_config['token']['prefix']) === 0)
     {
-      $token = $this->_decode(str_ireplace($this->_config['token']['prefix'] . ' ', '', $header));
+      $token = $this->_decode(str_ireplace($this->_config['token']['prefix'] . ' ', '', $header[0]));
       return $this->_id = $token->sub;
     }
-    if (!empty($request->query($this->_config['token']['parameter'])))
+    if (!empty($request->getQueryParams($this->_config['token']['parameter'])))
     {
-      $token = $this->_decode($request->query($this->_config['token']['parameter']));
+      $token = $this->_decode($request->getQueryParams($this->_config['token']['parameter'])[0]);
       return $this->_id = $token->sub;
     }
   }
@@ -80,9 +81,13 @@ class CacheStorage extends MemoryStorage
   {
     $config = $this->_config;
     try {
-      $payload = JWT::decode($token, $this->_config['token']['key'] ?: Security::salt(), $this->_config['token']['allowedAlgs']);
+      $payload = JWT::decode($token, $this->_config['token']['key'] ?: Security::getSalt(), $this->_config['token']['allowedAlgs']);
       return $payload;
     } catch (ExpiredException $e) {
+      throw new UnauthorizedException($e->getMessage());
+    }catch (SignatureInvalidException $e) {
+      throw new UnauthorizedException($e->getMessage());
+    }catch (\DomainException $e) {
       throw new UnauthorizedException($e->getMessage());
     }
   }

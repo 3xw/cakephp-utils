@@ -1,12 +1,12 @@
 <?php
 namespace Trois\Utils\Auth;
 
-use Trois\Utils\Utility\Base64Url;
+use Trois\Utils\Utility\Crypto\Base64Url;
+use Trois\Utils\Utility\Crypto\Mcrypt;
 use Cake\Utility\Security;
-use Cake\Utility\Crypto\Mcrypt;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
-use Cake\Network\Exception\UnauthorizedException;
+use Cake\Http\Exception\UnauthorizedException;
 use Cake\Auth\BaseAuthenticate;
 
 class LegacyTokenAuthenticate extends BaseAuthenticate
@@ -19,9 +19,7 @@ class LegacyTokenAuthenticate extends BaseAuthenticate
       'password' => 'password'
     ],
     'userModel' => 'Users',
-    'scope' => [],
     'finder' => 'all',
-    'contain' => ['Roles'],
     'passwordHasher' => 'Default'
   ];
 
@@ -32,20 +30,15 @@ class LegacyTokenAuthenticate extends BaseAuthenticate
 
   public function getUser(ServerRequest $request)
   {
-    if($request->header('API-TOKEN') || $request->header('X-API-TOKEN'))
+    if($request->getHeader('API-TOKEN') || $request->getHeader('X-API-TOKEN'))
     {
-      $cipher = $request->header('API-TOKEN')? $request->header('API-TOKEN'): $request->header('X-API-TOKEN');
-      $cipher = Base64Url::decode($cipher);
+      $cipher = $request->getHeader('API-TOKEN')? $request->getHeader('API-TOKEN'): $request->getHeader('X-API-TOKEN');
+      $cipher = Base64Url::decode($cipher[0]);
       Security::engine(new Mcrypt());
-      $username = Security::decrypt($cipher, $this->config('key'), $this->config('salt'));
+      $username = Security::decrypt($cipher, $this->getConfig('key'), $this->getConfig('salt'));
       $user = $this->_findUser($username);
 
-  		if (empty($user)) {
-  			return false;
-  		}
-      //$role = $user['role'];
-      //$user['role'] = $role['name'];
-      return $user;
+  		return empty($user)? false: $user;
     }
 
     return false;

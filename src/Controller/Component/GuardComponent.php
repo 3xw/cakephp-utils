@@ -62,16 +62,16 @@ class GuardComponent extends Component
   protected function _applyRule($rule, $user, $role,$request)
   {
     $method = $request->getMethod();
-    $plugin = $request->plugin;
-    $controller = $request->controller;
-    $action = $request->action;
+    $plugin = $request->getParam('plugin');
+    $controller = $request->getParam('controller');
+    $action = $request->getParam('action');
     $prefix = null;
     $extension = null;
-    if (!empty($request->params['prefix'])) {
-      $prefix = $request->params['prefix'];
+    if (!empty($request->getParam('prefix'))) {
+      $prefix = $request->getParam('prefix');
     }
-    if (!empty($request->params['_ext'])) {
-      $extension = $request->params['_ext'];
+    if (!empty($request->getParam('_ext'))) {
+      $extension = $request->getParam('_ext');
     }
 
     if ($this->_matchOrAsterisk($rule, 'role', $role) &&

@@ -9,7 +9,7 @@ use Cake\Network\Response;
 use Cake\Utility\Security;
 use Cake\Http\ServerRequest;
 use Firebase\JWT\ExpiredException;
-use Cake\Network\Exception\UnauthorizedException;
+use Firebase\JWT\SignatureInvalidException;
 use Firebase\JWT\JWT;
 
 class JwtBearerAuthenticate extends CakeBasicAuthenticate
@@ -30,17 +30,10 @@ class JwtBearerAuthenticate extends CakeBasicAuthenticate
       'username' => 'id',
       'password' => 'password'
     ],
-    'unauthenticatedException' => '\Cake\Network\Exception\UnauthorizedException',
+    'unauthenticatedException' => '\Cake\Http\Exception\UnauthorizedException',
     'key' => null,
     'allowedAlgs' => ['HS256']
   ];
-
-  public function unauthenticated(ServerRequest $request, Response $response)
-  {
-    $Exception = new UnauthorizedException('Ah ah ah! You didn\'t say the magic word!');
-    $Exception->responseHeader([$this->loginHeaders($request)]);
-    throw $Exception;
-  }
 
   public function getUser(Request $request)
   {
@@ -91,13 +84,13 @@ class JwtBearerAuthenticate extends CakeBasicAuthenticate
       return $this->_token;
     }
 
-    $header = $request->header($config['header']);
-    if ($header && stripos($header, $config['prefix']) === 0) {
-      return $this->_token = str_ireplace($config['prefix'] . ' ', '', $header);
+    $header = $request->getHeader($config['header']);
+    if (!empty($header) && stripos($header[0], $config['prefix']) === 0) {
+      return $this->_token = str_ireplace($config['prefix'] . ' ', '', $header[0]);
     }
 
-    if (!empty($this->_config['parameter'])) {
-      $this->_token = $request->query($this->_config['parameter']);
+    if (!empty($this->_config['parameter']) && !empty($request->getQueryParams($this->_config['parameter']))) {
+      $this->_token = $request->getQueryParams($this->_config['parameter'])[0];
     }
 
     return $this->_token;
@@ -107,11 +100,15 @@ class JwtBearerAuthenticate extends CakeBasicAuthenticate
   {
     $config = $this->_config;
     try {
-      $payload = JWT::decode($token, $config['key'] ?: Security::salt(), $config['allowedAlgs']);
+      $payload = JWT::decode($token, $config['key'] ?: Security::getSalt(), $config['allowedAlgs']);
 
       return $payload;
     } catch (ExpiredException $e) {
-      throw new UnauthorizedException($e->getMessage());  
+      throw new UnauthorizedException($e->getMessage());
+    }catch (SignatureInvalidException $e) {
+      throw new UnauthorizedException($e->getMessage());
+    }catch (\DomainException $e) {
+      throw new UnauthorizedException($e->getMessage());
     }
   }
 }

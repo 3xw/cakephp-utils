@@ -6,7 +6,7 @@ use Cake\ORM\Behavior;
 use Cake\ORM\Entity;
 use Cake\ORM\Query;
 
-use Cake\Utility\Inflector;
+use Cake\Utility\Text;
 use ArrayObject;
 use Cake\Datasource\ConnectionManager;
 use Cake\Datasource\EntityInterface;
@@ -35,14 +35,14 @@ class SluggableBehavior extends Behavior
 
   public function buildValidator(Event $event, Validator $validator, $name)
   {
-    $config = $this->config();
+    $config = $this->getConfig();
     $slug = $config['slug'];
     $validator->requirePresence($slug, false)->allowEmpty($slug);
   }
 
   public function beforeSave(Event $event, EntityInterface $entity, ArrayObject $options)
   {
-    $config = $this->config();
+    $config = $this->getConfig();
     $slug = $config['slug'];
     $fields = (empty($config['fields']))? [$config['field']]: $config['fields'];
 
@@ -54,7 +54,7 @@ class SluggableBehavior extends Behavior
 
   public function slug(Event $event, EntityInterface $entity, $fields, $slug)
   {
-    $config = $this->config();
+    $config = $this->getConfig();
     $value = '';
     foreach ( $fields as $field) {
       if(empty($entity->get($field)))
@@ -84,9 +84,9 @@ class SluggableBehavior extends Behavior
 
   public function _generate_slug($id, $value, $locale = null )
   {
-    $config = $this->config();
+    $config = $this->getConfig();
     $field = $config['slug'];
-    $slug = strtolower(Inflector::slug($value, $config['replacement']));
+    $slug = strtolower(Text::slug($value, $config['replacement']));
 
     if (strlen($slug) > $config['max_length'])
     {
@@ -97,9 +97,9 @@ class SluggableBehavior extends Behavior
 
   private function _deduplicate_slug($id, $slug, $field, $locale = null)
   {
-    $config = $this->config();
+    $config = $this->getConfig();
 
-    $tableName = ( $locale )? $config['translationTable'] : $this->_table->table();
+    $tableName = ( $locale )? $config['translationTable'] : $this->_table->getTable();
     $f = ($locale)? 'content' : $field;
 
     if($locale)

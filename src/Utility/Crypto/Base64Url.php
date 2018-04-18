@@ -1,5 +1,5 @@
 <?php
-namespace Trois\Utils\Utility;
+namespace Trois\Utils\Utility\Crypto;
 
 class Base64Url
 {
