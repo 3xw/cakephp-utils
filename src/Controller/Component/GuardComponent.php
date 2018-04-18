@@ -49,9 +49,9 @@ class GuardComponent extends Component
     $this->_applyRules($this->Auth->user(), $this->request);
   }
 
-  protected function _applyRules(array $user, ServerRequest $request)
+  protected function _applyRules($user, ServerRequest $request)
   {
-    $role = Hash::get($user, $this->getConfig('role_field'));
+    $role = empty($user)? null: Hash::get($user, $this->getConfig('role_field'));
     foreach ($this->_ruleSettings as $setting)
     {
       $rules = Configure::read($setting);

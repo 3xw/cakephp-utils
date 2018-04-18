@@ -19,7 +19,7 @@ Load it in your config/boostrap.php
 
  - Sluggable Behavior
  - Translate Behavior
- 
+
 ### Rules
 
  - IsUniqueTranslationRule
@@ -43,27 +43,27 @@ in your src/Controller/AppController.php add following:
 	public function initialize()
   	{
 	    parent::initialize();
-	
+
 	    ...
-	    
+
 	    // Auth
 	    $this->loadComponent('Auth', [...]);
-	
+
 	    // Guard
 	    $this->loadComponent('Trois/Utils.Guard',[
 	      'autoload_configs' => [
 	        'Guard.requestBody' => 'guard_request_body'
 	      ]
 	    ]);
-	    
+
 	    ...
   	}
-  	
+
 in config/guard\_request\_body.php
 
 		<?php
 		use Cake\Http\ServerRequest;
-		
+
 		return [
 		  'Guard.requestBody' => [
 		    [
@@ -72,7 +72,7 @@ in config/guard\_request\_body.php
 		      'controller' => ['Users','Subscriptions'],
 		      'action' => ['register','registerAndBook'],
 		      'method' => ['POST','PUT'],
-		      'rule' => function(array $user, $role, ServerRequest $request)
+		      'rule' => function($user, $role, ServerRequest $request)
 		      {
 		        // magic here... manipulate request here
 		      }
@@ -83,17 +83,17 @@ in config/guard\_request\_body.php
 ### CORS Middleware
 
 in your src/Application.php add following:
-	
+
 	use Trois\Utils\Middleware\CorsMiddleware;
 	...
 	public function middleware($middlewareQueue)
 	{
 		$middlewareQueue
 		->add(new CorsMiddleware::class)
-		
+
 		/* -- OR  -- */
 		->add(new CorsMiddleware([
-		
+
 			// thoses are default options
 		    'all' => [
 		      'Access-Control-Allow-Origin' => '*',
@@ -104,9 +104,9 @@ in your src/Application.php add following:
 		    'options' => [
 		      'methods' => 'GET, POST, OPTIONS, PUT, DELETE'
 		    ]
-	    
+
 	  	]))
-	  	
+
 		...
 	}
 
@@ -123,47 +123,47 @@ src/Controller/Appcontroller.php
 	$this->loadComponent('Auth', Configure::read('Auth.V2'));
 
 config/auth.php
-	
+
 	<?
 	use Cake\Core\Configure;
-	
+
 	return [
 	  'Auth.V2' => [
-	
+
 	    'loginAction' => false,
 	    'unauthorizedRedirect' => false,
 	    'checkAuthIn' => 'Controller.initialize' ,
-	
+
 	    // Authenticate
 	    'authenticate' => [
-	
+
 	      // map role
 	      'all' => ['finder' => 'Auth'],
-	
+
 	      // Legacy X-API-TOKEN header token
 	      'Trois/Utils.LegacyToken' => [
 	        'key' => Configure::read('Legacy.key'),
 	        'salt' => Configure::read('Legacy.salt')
 	      ],
-	
+
 	      // with Bearer JWT token
 	      'Trois\Utils\Auth\JwtBearerAuthenticate' => [
 	        'duration' => 3600
 	      ],
-	
+
 	      // Basic username + pass
 	      'Trois\Utils\Auth\BasicToJwtBearerAuthenticate' => [
 	        'fields' => ['username' => 'username'],
 	        'passwordHasher' => 'Trois\Utils\Auth\LegacyPasswordHasher',
 	      ],
 	    ],
-	
+
 	    // Cache Storage Engine
 	    'storage' => [
 	      'className' => 'Trois\Utils\Auth\Storage\CacheStorage',
 	      'cache' => 'token'
 	    ],
-	
+
 	    // Authorize
 	    'authorize' => [
 	      'CakeDC/Auth.SimpleRbac' => [
