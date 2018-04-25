@@ -54,7 +54,7 @@ class CorsMiddleware
   {
     if (isset($_SERVER['HTTP_ORIGIN']))
     {
-      foreach($this->config('all') as $header => $value)
+      foreach($this->getConfig('all') as $header => $value)
       {
         $response = $response->withHeader($header, $value);
       }
