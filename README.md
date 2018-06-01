@@ -286,6 +286,19 @@ Configure cache.php like follow:
 				'action' => '*',
 				'extension' => '*'
 			],
+			
+			// clear request
+			[
+		      'clear' => true,
+		      'key' => '*',
+		      'method' => ['POST','PUT','DELETE'],
+			  'code' => ['200','201','202','302'], // 302 is often triggered by cakephp in case of success crud operation...
+			  'prefix' => '*',
+			  'plugin' => '*',
+			  'controller' => '*',
+			  'action' => '*',
+			  'extension' => '*'
+			],
 		]
 	];
 
