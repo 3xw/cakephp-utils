@@ -70,9 +70,9 @@ class CacheStorage extends MemoryStorage
       $token = $this->_decode(str_ireplace($this->_config['token']['prefix'] . ' ', '', $header[0]));
       return $this->_id = $token->sub;
     }
-    if (!empty($request->getQueryParams($this->_config['token']['parameter'])))
+    if (!empty($request->getQueryParams()[$this->_config['token']['parameter']]))
     {
-      $token = $this->_decode($request->getQueryParams($this->_config['token']['parameter'])[0]);
+      $token = $this->_decode($request->getQueryParams()[$this->_config['token']['parameter']]);
       return $this->_id = $token->sub;
     }
   }

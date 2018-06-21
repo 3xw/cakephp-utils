@@ -18,6 +18,12 @@ class TwoFactorAuthenticate extends FormAuthenticate
       'length' => 8,
       'field' => 'code'
     ],
+    'verifyAction' => [
+      'prefix' => false,
+      'controller' => 'TwoFactorAuth',
+      'action' => 'verify',
+      'plugin' => 'Tois/Utils'
+    ],
     'token' => [
       'allowedAlgs' => ['HS256'],
       'duration' => 3600,
