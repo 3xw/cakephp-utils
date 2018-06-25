@@ -13,6 +13,9 @@ Load it in your config/boostrap.php
 
 	Plugin::load('Trois/Utils');
 
+	// OR if you use twoFactor Auth
+	Plugin::load('Trois/Utils',['routes' => true]);
+
 ## Model
 
 ### Behaviors
@@ -172,7 +175,7 @@ config/auth.php
 	    ],
 	  ]
 	];
-	
+
 ## Cache
 
 ### cache settings
@@ -286,7 +289,7 @@ Configure cache.php like follow:
 				'action' => '*',
 				'extension' => '*'
 			],
-			
+
 			// clear request
 			[
 		      'clear' => true,
@@ -342,7 +345,7 @@ Configure Nginx too:
 		}
 
 	}
-	
+
 ### Redis caching
 This plugin provides a very little bit different redis engine based on cakephp's RedisEngine.
 differences are:

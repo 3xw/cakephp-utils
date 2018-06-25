@@ -24,7 +24,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
       'prefix' => false,
       'controller' => 'TwoFactorAuth',
       'action' => 'verify',
-      'plugin' => 'Tois/Utils'
+      'plugin' => 'Trois/Utils'
     ],
     'token' => [
       'allowedAlgs' => ['HS256'],
