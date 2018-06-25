@@ -50,6 +50,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
   public function genCode()
   {
     $this->code = '';
+    $count = 0;
     while ( $count < $this->getConfig('code.length') ) {
       $digit = mt_rand(0, 9);
       $this->code .= $digit;
@@ -85,10 +86,10 @@ class TwoFactorAuthenticate extends FormAuthenticate
   public function authenticate(ServerRequest $request, Response $response)
   {
     // look for form auth fields
-    $formAuth = $this->_checkFields($request, $this->getConfig('fields')));
+    $formAuth = $this->_checkFields($request, $this->getConfig('fields'));
 
     // look for token auth fields
-    $tokenCodeAuth = $this->_checkFields($request, [$this->getConfig('token.field'), $this->getConfig('code.field')]));
+    $tokenCodeAuth = $this->_checkFields($request, [$this->getConfig('token.field'), $this->getConfig('code.field')]);
 
     // if none
     if(!$formAuth && !$tokenCodeAuth) return false;
@@ -97,10 +98,10 @@ class TwoFactorAuthenticate extends FormAuthenticate
     if($formAuth)
     {
       // find and test user
-      if(!$user = $this->_findUser($request->getData($fields['username']),$request->getData($fields['password']))) return false;
+      if(!$user = $this->_findUser($request->getData($this->getConfig('fields.username')),$request->getData($this->getConfig('fields.password')))) return false;
 
       // create code + token and redirect to verify action
-      $this->token = JWT::encode(['username' => $user[$this->getConfig('field.username')],'code' => $this->genCode(),'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
+      $this->token = JWT::encode(['username' => $user[$this->getConfig('fields.username')],'code' => $this->genCode(),'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
       $this->_registry->getController()->setResponse($response->withLocation(Router::url($this->getConfig('verifyAction'), true)));
     }
 
