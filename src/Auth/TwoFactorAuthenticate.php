@@ -37,8 +37,8 @@ class TwoFactorAuthenticate extends FormAuthenticate
     'token' => [
       'allowedAlgs' => ['HS256'],
       'duration' => 3600,
+      'sub' => 'id',
       'field' => 'token',
-      'sub' => 'id'
     ],
     'fields' => [
       'username' => 'email',
@@ -128,7 +128,15 @@ class TwoFactorAuthenticate extends FormAuthenticate
 
       // set redirect to verify action and flash message
       $this->_registry->getController()->Flash->success($this->_transmitter->getConfig('messages.success'));
-      $this->_registry->getController()->setResponse($response->withLocation(Router::url($this->getConfig('verifyAction'), true)));
+      $pass = ['?' => [
+        'challenge' => $this->token,
+        'token' => $this->getConfig('token.field'),
+        'code' => $this->getConfig('code.field')
+      ]];
+      $this->_registry->getController()->setResponse($response->withLocation(Router::url($this->getConfig('verifyAction') + $pass, true)));
+
+      // prevent Auth to store incomplete processed user
+      $this->_registry->getController()->Auth->config('storage','Memory');
     }
 
     // token + code Auth

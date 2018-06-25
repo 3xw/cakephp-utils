@@ -6,10 +6,16 @@ use App\Controller\AppController;
 
 class TwoFactorAuthController extends AppController
 {
+  public function initialize()
+  {
+    parent::initialize();
+    if($this->Auth->getConfig('checkAuthIn') == 'Controller.startup') $this->Auth->allow(['verify']);
+  }
+
   public function beforeFilter(Event $event)
   {
     parent::beforeFilter($event);
-    $this->Auth->allow(['verify']);
+    if($this->Auth->getConfig('checkAuthIn') != 'Controller.startup') $this->Auth->allow(['verify']);
   }
 
   public function verify()
