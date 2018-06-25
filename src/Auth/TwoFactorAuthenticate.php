@@ -3,6 +3,7 @@ namespace Trois\Utils\Auth;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\ExpiredException;
+use Firebase\JWT\SignatureInvalidException;
 use Cake\Controller\ComponentRegistry;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
@@ -10,6 +11,7 @@ use Cake\Event\Event;
 use Cake\Utility\Security;
 use Cake\Http\Exception\UnauthorizedException;
 use Cake\Auth\FormAuthenticate;
+use Cake\Routing\Router;
 
 class TwoFactorAuthenticate extends FormAuthenticate
 {
@@ -48,7 +50,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
   public function genCode()
   {
     $this->code = '';
-    while ( $count < $this->_config['code.length'] ) {
+    while ( $count < $this->getConfig('code.length') ) {
       $digit = mt_rand(0, 9);
       $this->code .= $digit;
       $count++;
@@ -56,53 +58,67 @@ class TwoFactorAuthenticate extends FormAuthenticate
     return $this->code;
   }
 
-  public function findUser(ServerRequest $request, Response $response)
+  protected function _checkFields(ServerRequest $request, array $fields)
   {
-    $fields = $this->_config['fields'];
-    if (!$this->_checkFields($request, $fields)) return false;
-
-    $user = $this->_findUser($request->getData($fields['username']),$request->getData($fields['password']));
-
-    if($user)
-    {
-      $this->genCode();
-      $this->token = JWT::encode([
-        'username' => $user[$this->config('field.username')],
-        'code' => $this->code,
-        'exp' =>  time() + $this->config('token.duration')
-      ], Security::salt());
+    foreach ($fields as $field) {
+      $value = $request->getData($field);
+      if (empty($value) || !is_string($value)) return false;
     }
+    return true;
+  }
 
-    return $user;
+  protected function _decode()
+  {
+    $config = $this->_config;
+    try {
+      $payload = JWT::decode($request->getData($this->getConfig('token.field')), Security::salt(), $this->getConfig('token.allowedAlgs'));
+      return $payload;
+    } catch (ExpiredException $e) {
+      throw new UnauthorizedException($e->getMessage());
+    }catch (SignatureInvalidException $e) {
+      throw new UnauthorizedException($e->getMessage());
+    }catch (\DomainException $e) {
+      throw new UnauthorizedException($e->getMessage());
+    }
   }
 
   public function authenticate(ServerRequest $request, Response $response)
   {
-    // look for fileds
-    $fields = [$this->_config['code.field'], $this->_config['token.field']];
-    if (!$this->_checkFields($request, $fields)) return false;
+    // look for form auth fields
+    $formAuth = $this->_checkFields($request, $this->getConfig('fields')));
 
-    // read token
-    try {
-      $payload = JWT::decode($request->getData($this->_config['token.field']), Security::salt(), $this->_config['token.allowedAlgs']);
-      $username = $payload->username;
-      $code = $payload->code;
-    } catch (ExpiredException $e) {
-      throw new UnauthorizedException($e->getMessage());
+    // look for token auth fields
+    $tokenCodeAuth = $this->_checkFields($request, [$this->getConfig('token.field'), $this->getConfig('code.field')]));
+
+    // if none
+    if(!$formAuth && !$tokenCodeAuth) return false;
+
+    // form Auth
+    if($formAuth)
+    {
+      // find and test user
+      if(!$user = $this->_findUser($request->getData($fields['username']),$request->getData($fields['password']))) return false;
+
+      // create code + token and redirect to verify action
+      $this->token = JWT::encode(['username' => $user[$this->getConfig('field.username')],'code' => $this->genCode(),'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
+      $this->_registry->getController()->setResponse($response->withLocation(Router::url($this->getConfig('verifyAction'), true)));
     }
 
-    // look for user
-    $user = $this->_query($username)->first();
-    if (empty($user)) return false;
+    // token + code Auth
+    if($tokenCodeAuth)
+    {
+      // read token
+      $payload = $this->_decode();
 
-    // test code
-    if((string)$code !== (string)$request->getData($this->_config['code.field']))return false;
+      // look for user
+      if (!$user = $this->_query($payload->username)->first()) return false;
 
-    // set $token
-    $this->token = JWT::encode([
-      'sub' => $user[$this->config('token.sub')],
-      'exp' =>  time() + $this->config('token.duration')
-    ], Security::salt());
+      // test code
+      if((string)$payload->code !== (string)$request->getData($this->getConfig('code.field'))) return false;
+
+      // set Bearer token for BearerTokenAuth
+      $this->token = JWT::encode(['sub' => $user[$this->getConfig('token.sub')],'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
+    }
 
     return $user;
   }
