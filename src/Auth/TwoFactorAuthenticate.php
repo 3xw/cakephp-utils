@@ -12,19 +12,27 @@ use Cake\Utility\Security;
 use Cake\Http\Exception\UnauthorizedException;
 use Cake\Auth\FormAuthenticate;
 use Cake\Routing\Router;
+use Trois\Utils\Auth\TwoFactor\EmailCodeTransmitter\AbstractCodeTransmitter;
 
 class TwoFactorAuthenticate extends FormAuthenticate
 {
+  /** @var AbstractCodeTransmitter */
+  protected $_transmitter;
+
   protected $_defaultConfig = [
-    'code' => [
-      'length' => 8,
-      'field' => 'code'
+    'transmitter' => [
+      'class' => '\Trois\Utils\Auth\TwoFactor\EmailCodeTransmitter',
+      'config' => []
     ],
     'verifyAction' => [
       'prefix' => false,
       'controller' => 'TwoFactorAuth',
       'action' => 'verify',
       'plugin' => 'Trois/Utils'
+    ],
+    'code' => [
+      'length' => 8,
+      'field' => 'code'
     ],
     'token' => [
       'allowedAlgs' => ['HS256'],
@@ -83,6 +91,13 @@ class TwoFactorAuthenticate extends FormAuthenticate
     }
   }
 
+  protected function _transmit(string $code, array $user, ServerRequest $request, Response $response)
+  {
+    $transmitter = $this->getConfig('transmitter.class');
+    $this->_transmitter = new $transmitter($this->getConfig('transmitter.config'));
+    return $this->_transmitter->transmit($code, $user, $request, $response);
+  }
+
   public function authenticate(ServerRequest $request, Response $response)
   {
     // look for form auth fields
@@ -100,8 +115,19 @@ class TwoFactorAuthenticate extends FormAuthenticate
       // find and test user
       if(!$user = $this->_findUser($request->getData($this->getConfig('fields.username')),$request->getData($this->getConfig('fields.password')))) return false;
 
-      // create code + token and redirect to verify action
+      // create code + token
       $this->token = JWT::encode(['username' => $user[$this->getConfig('fields.username')],'code' => $this->genCode(),'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
+
+      // transmit
+      $transmitted = $this->_transmit($this->code, $user, $request, $response);
+      if(!$transmitted)
+      {
+        $this->_registry->getController()->Auth->config('authError', $this->_transmitter->getConfig('messages.error'));
+        return false;
+      }
+
+      // set redirect to verify action and flash message
+      $this->_registry->getController()->Flash->success($this->_transmitter->getConfig('messages.success'));
       $this->_registry->getController()->setResponse($response->withLocation(Router::url($this->getConfig('verifyAction'), true)));
     }
 
