@@ -13,6 +13,7 @@ use Cake\Http\Exception\UnauthorizedException;
 use Cake\Auth\FormAuthenticate;
 use Cake\Routing\Router;
 use Trois\Utils\Auth\TwoFactor\EmailCodeTransmitter\AbstractCodeTransmitter;
+use Cake\Auth\PasswordHasherFactory;
 
 class TwoFactorAuthenticate extends FormAuthenticate
 {
@@ -32,7 +33,8 @@ class TwoFactorAuthenticate extends FormAuthenticate
     ],
     'code' => [
       'length' => 8,
-      'field' => 'code'
+      'field' => 'code',
+      'passwordHasher' => 'Default'
     ],
     'token' => [
       'allowedAlgs' => ['HS256'],
@@ -109,6 +111,9 @@ class TwoFactorAuthenticate extends FormAuthenticate
     // if none
     if(!$formAuth && !$tokenCodeAuth) return false;
 
+    // construct hasher
+    $hasher = PasswordHasherFactory::build($this->getConfig('code.passwordHasher'));
+
     // form Auth
     if($formAuth)
     {
@@ -116,7 +121,8 @@ class TwoFactorAuthenticate extends FormAuthenticate
       if(!$user = $this->_findUser($request->getData($this->getConfig('fields.username')),$request->getData($this->getConfig('fields.password')))) return false;
 
       // create code + token
-      $this->token = JWT::encode(['username' => $user[$this->getConfig('fields.username')],'code' => $this->genCode(),'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
+      $this->genCode();
+      $this->token = JWT::encode(['username' => $user[$this->getConfig('fields.username')],'code' => $hasher->hash($this->code),'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
 
       // transmit
       $transmitted = $this->_transmit($this->code, $user, $request, $response);
@@ -149,7 +155,8 @@ class TwoFactorAuthenticate extends FormAuthenticate
       if (!$user = $this->_query($payload->username)->first()) return false;
 
       // test code
-      if((string)$payload->code !== (string)$request->getData($this->getConfig('code.field'))) return false;
+      $password = $request->getData($this->getConfig('code.field'));
+      if (!$hasher->check($password, $payload->code)) return false;
 
       // set Bearer token for BearerTokenAuth
       $this->token = JWT::encode(['sub' => $user[$this->getConfig('token.sub')],'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
