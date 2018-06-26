@@ -41,6 +41,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
       'duration' => 3600,
       'sub' => 'id',
       'field' => 'token',
+      'parameter' => 'token',
     ],
     'fields' => [
       'username' => 'email',
@@ -139,7 +140,9 @@ class TwoFactorAuthenticate extends FormAuthenticate
         'codefield' => $this->getConfig('code.field'),
         'challenge' => $this->token
       ]];
-      $this->_registry->getController()->setResponse($response->withLocation(Router::url($this->getConfig('verifyAction') + $pass, true)));
+      $response = $response->withLocation(Router::url($this->getConfig('verifyAction') + $pass, true));
+      //$response = $response->withHeader('WWW-Authenticate','Bearer');
+      $this->_registry->getController()->setResponse($response);
 
       // prevent Auth to store incomplete processed user
       $this->_registry->getController()->Auth->config('storage','Memory');
@@ -160,6 +163,11 @@ class TwoFactorAuthenticate extends FormAuthenticate
 
       // set Bearer token for BearerTokenAuth
       $this->token = JWT::encode(['sub' => $user[$this->getConfig('token.sub')],'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
+
+      // if no cookie then pass token as an argument
+      if($this->_registry->getController()->Auth->getConfig('storage') != 'Session')
+        $this->_registry->getController()->Auth->config('loginRedirect',$this->_registry->getController()->Auth->config('loginRedirect')+['?' => [$this->getConfig('token.parameter') => $this->token]]);
+
     }
 
     return $user;
