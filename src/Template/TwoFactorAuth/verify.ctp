@@ -62,19 +62,22 @@ $this->Form->templates([
         </div>
 
         <? if(!empty($this->request->query['challenge']) && !empty($this->request->query['token']) && !empty($this->request->query['code'])): ?>
-        <?= $this->Form->create('User') ?>
+          <?= $this->Form->create('User') ?>
 
-        <div class="form-group">
-          <label>Code</label>
-          <?= $this->Form->input($this->request->query['code'], ['required' => true,'class' => 'form-control', 'placeholder' =>"code", 'label' => false]) ?>
-        </div>
-        <div class="form-group">
-          <?= $this->Form->input($this->request->query['token'], ['required' => true,'class' => 'form-control', 'label' => false, 'value' =>$this->request->query['challenge']]) ?>
-        </div>
-        <div class="footer text-center">
-          <button type="submit" class="btn btn-fill btn-success btn-wd">Connexion</button>
-        </div>
-        <?= $this->Form->end() ?>
+          <div class="form-group">
+            <label>Code</label>
+            <?= $this->Form->input($this->request->query['code'], ['required' => true,'class' => 'form-control', 'placeholder' =>"code", 'label' => false]) ?>
+          </div>
+          <div class="form-group">
+            <?= $this->Form->input($this->request->query['token'], ['required' => true,'class' => 'form-control', 'label' => false, 'value' =>$this->request->query['challenge']]) ?>
+          </div>
+          <div class="footer text-center">
+            <button type="submit" class="btn btn-fill btn-success btn-wd">Connexion</button>
+          </div>
+          <?= $this->Form->end() ?>
+        <? else: ?>
+          <h2>Missing token</h2>
+        <? endif; ?>
       </div>
     </div>
   </div>

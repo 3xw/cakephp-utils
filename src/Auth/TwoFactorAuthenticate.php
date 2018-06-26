@@ -129,9 +129,9 @@ class TwoFactorAuthenticate extends FormAuthenticate
       // set redirect to verify action and flash message
       $this->_registry->getController()->Flash->success($this->_transmitter->getConfig('messages.success'));
       $pass = ['?' => [
-        'challenge' => $this->token,
         'token' => $this->getConfig('token.field'),
-        'code' => $this->getConfig('code.field')
+        'code' => $this->getConfig('code.field'),
+        'challenge' => $this->token
       ]];
       $this->_registry->getController()->setResponse($response->withLocation(Router::url($this->getConfig('verifyAction') + $pass, true)));
 
