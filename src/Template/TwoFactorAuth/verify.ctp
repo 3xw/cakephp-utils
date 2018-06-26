@@ -61,15 +61,15 @@ $this->Form->templates([
 
         </div>
 
-        <? if(!empty($this->request->query['challenge']) && !empty($this->request->query['token']) && !empty($this->request->query['code'])): ?>
+        <? if(!empty($this->request->query['challenge']) && !empty($this->request->query['tokenfield']) && !empty($this->request->query['codefield'])): ?>
           <?= $this->Form->create('User') ?>
 
           <div class="form-group">
             <label>Code</label>
-            <?= $this->Form->input($this->request->query['code'], ['required' => true,'class' => 'form-control', 'placeholder' =>"code", 'label' => false]) ?>
+            <?= $this->Form->input($this->request->query['codefield'], ['required' => true,'class' => 'form-control', 'placeholder' =>"code", 'label' => false]) ?>
           </div>
           <div class="form-group">
-            <?= $this->Form->input($this->request->query['token'], ['required' => true,'class' => 'form-control', 'label' => false, 'value' =>$this->request->query['challenge']]) ?>
+            <?= $this->Form->input($this->request->query['tokenfield'], ['type' => 'hidden','value' => $this->request->query['challenge']]) ?>
           </div>
           <div class="footer text-center">
             <button type="submit" class="btn btn-fill btn-success btn-wd">Connexion</button>

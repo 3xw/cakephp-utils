@@ -76,7 +76,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
     return true;
   }
 
-  protected function _decode()
+  protected function _decode(ServerRequest $request)
   {
     $config = $this->_config;
     try {
@@ -129,8 +129,8 @@ class TwoFactorAuthenticate extends FormAuthenticate
       // set redirect to verify action and flash message
       $this->_registry->getController()->Flash->success($this->_transmitter->getConfig('messages.success'));
       $pass = ['?' => [
-        'token' => $this->getConfig('token.field'),
-        'code' => $this->getConfig('code.field'),
+        'tokenfield' => $this->getConfig('token.field'),
+        'codefield' => $this->getConfig('code.field'),
         'challenge' => $this->token
       ]];
       $this->_registry->getController()->setResponse($response->withLocation(Router::url($this->getConfig('verifyAction') + $pass, true)));
@@ -143,7 +143,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
     if($tokenCodeAuth)
     {
       // read token
-      $payload = $this->_decode();
+      $payload = $this->_decode($request);
 
       // look for user
       if (!$user = $this->_query($payload->username)->first()) return false;

@@ -27,7 +27,6 @@ class EmailCodeTransmitter extends AbstractCodeTransmitter
   // returns bool
   public function transmit(string $code, array $user,ServerRequest $request, Response $response)
   {
-    return true;
     $email = new Email();
     $email
     ->setProfile($this->getConfig('email.profile'))
