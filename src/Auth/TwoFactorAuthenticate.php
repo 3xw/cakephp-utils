@@ -86,11 +86,14 @@ class TwoFactorAuthenticate extends FormAuthenticate
       $payload = JWT::decode($request->getData($this->getConfig('token.field')), Security::salt(), $this->getConfig('token.allowedAlgs'));
       return $payload;
     } catch (ExpiredException $e) {
-      throw new UnauthorizedException($e->getMessage());
+      $this->_registry->getController()->Flash->error($e->getMessage());
+      return false;
     }catch (SignatureInvalidException $e) {
-      throw new UnauthorizedException($e->getMessage());
+      $this->_registry->getController()->Flash->error($e->getMessage());
+      return false;
     }catch (\DomainException $e) {
-      throw new UnauthorizedException($e->getMessage());
+      $this->_registry->getController()->Flash->error($e->getMessage());
+      return false;
     }
   }
 
@@ -152,7 +155,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
     if($tokenCodeAuth)
     {
       // read token
-      $payload = $this->_decode($request);
+      if(!$payload = $this->_decode($request)) return false;
 
       // look for user
       if (!$user = $this->_query($payload->username)->first()) return false;
