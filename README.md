@@ -176,6 +176,43 @@ config/auth.php
 	  ]
 	];
 
+### Two factor Auth
+
+set up Auth:
+
+      'Trois\Utils\Auth\TwoFactorAuthenticate' => [
+        'userModel' => 'ExtranetUsers',
+        'passwordHasher' => 'App\Auth\NoHasher',
+        'fields' => [
+          'username' => 'CLIENT_ID',
+          'password' => 'Password'
+        ],
+        'transmitter' => [
+          'class' => '\Trois\Utils\Auth\TwoFactor\EmailCodeTransmitter', // any child of Trois\Utils\Auth\TwoFactor\AbstractCodeTransmitter
+          'config' => [
+            'messages' => [
+              'success' => 'Un email avec un code vous a été envoyé',
+              'error' => 'L\'application n\'a pas pu vous envoyer de mail. Veuillez essayer à nouveau.'
+            ],
+            'email' => [
+              'field' => 'Email',
+              'profile' => 'default',
+              'from' => ['info@xxx' => 'Site xxx'],
+              'subject' => 'Votre code personnel',
+              'emailFormat' => 'both',
+              'template' => 'Trois/Utils.default',
+              'layout' => 'default',
+            ]
+          ]
+        ],
+        'verifyAction' => [
+          'prefix' => 'extranet',
+          'controller' => 'ExtranetUsers',
+          'action' => 'verify',
+          'plugin' => false
+        ],
+      ],
+
 ## Cache
 
 ### cache settings
