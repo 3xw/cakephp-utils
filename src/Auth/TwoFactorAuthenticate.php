@@ -159,6 +159,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
 
       // look for user
       if (!$user = $this->_query($payload->username)->first()) return false;
+      $user = $user->toArray();
 
       // test code
       $password = $request->getData($this->getConfig('code.field'));
