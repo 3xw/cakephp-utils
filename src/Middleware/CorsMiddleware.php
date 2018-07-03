@@ -52,12 +52,9 @@ class CorsMiddleware
 
   protected function _setHeaders($response)
   {
-    if (isset($_SERVER['HTTP_ORIGIN']))
+    foreach($this->getConfig('all') as $header => $value)
     {
-      foreach($this->getConfig('all') as $header => $value)
-      {
-        $response = $response->withHeader($header, $value);
-      }
+      $response = $response->withHeader($header, $value);
     }
 
     return $response;
