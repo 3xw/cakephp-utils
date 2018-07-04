@@ -40,6 +40,7 @@ class CorsMiddleware
 
       $response = $response->withoutHeader('Location');
       $response = $response->withStatus(200);
+      $response = $this->_setHeaders($response);
 
     }else{
 
