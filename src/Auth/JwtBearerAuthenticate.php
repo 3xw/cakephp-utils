@@ -11,6 +11,7 @@ use Cake\Http\ServerRequest;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 use Firebase\JWT\JWT;
+use Cake\Http\Exception\UnauthorizedException;
 
 class JwtBearerAuthenticate extends CakeBasicAuthenticate
 {
