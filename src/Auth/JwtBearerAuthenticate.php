@@ -90,8 +90,8 @@ class JwtBearerAuthenticate extends CakeBasicAuthenticate
       return $this->_token = str_ireplace($config['prefix'] . ' ', '', $header[0]);
     }
 
-    if (!empty($this->_config['parameter']) && !empty($request->getQueryParams($this->_config['parameter']))) {
-      $this->_token = $request->getQueryParams($this->_config['parameter'])[0];
+    if (!empty($this->_config['parameter']) && !empty($request->getQueryParams()[$this->_config['parameter']])) {
+      $this->_token = $request->getQueryParams()[$this->_config['parameter']];
     }
 
     return $this->_token;
