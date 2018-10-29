@@ -9,14 +9,24 @@ The recommended way to install composer packages is:
 
 	composer require 3xw/cakephp-utils
 
-Load it in your config/boostrap.php
+In src/Application.php
 
-	Plugin::load('Trois/Utils');
+	use Cake\Http\BaseApplication;
+	...
 
-	// OR if you use twoFactor Auth
-	Plugin::load('Trois/Utils',['routes' => true]);
+	class Application extends BaseApplication {
 
-## Model
+		...
+
+	  public function bootstrap()
+	  {
+	    parent::bootstrap();
+	    this->addPlugin('Trois/Utils', ['routes' => true]);
+	  }
+		..
+	}
+
+## ORM
 
 ### Behaviors
 
@@ -26,6 +36,59 @@ Load it in your config/boostrap.php
 ### Rules
 
  - IsUniqueTranslationRule
+
+### Associations
+
+#### MinMaxAssocationTrait
+
+
+	namespace App\Model\Table
+	use Trois\Utils\ORM\Traits\MinMaxAssocationTrait;
+
+	class SubscriptionsTable extends Table
+	{
+		use MinMaxAssocationTrait;
+
+		public function initialize(array $config)
+		{
+			...
+
+			// custom Association
+	    	$this->belongsToMinMax('MinPeriodes', [
+	      'type' => 'MIN',
+	      'field' => 'date',
+	      'className' => 'Periodes',
+	      'foreignKey' => 'subscription_id',
+	      'targetForeignKey' => 'periode_id',
+	      'joinTable' => 'subscriptions_periodes',
+	      'joinType' => 'LEFT'
+	    ]);
+		}
+	}
+
+	// OR
+	namespace App\Model\Table
+	use Trois\Utils\ORM\Traits\MinMaxAssocationTrait;
+
+	class LessonsTable extends Table
+	{
+		use MinMaxAssocationTrait;
+
+		public function initialize(array $config)
+		{
+			...
+
+			// custom Association
+	    	$this->hasOneMinMax('MinPeriode', [
+	      'type' => 'MIN',
+	      'field' => 'date',
+	      'className' => 'Periodes',
+	      'foreignKey' => 'lesson_id',
+	      'joinType' => 'LEFT'
+	    ]);
+		}
+	}
+	
 
 ## Shell
 

@@ -1,15 +1,4 @@
 <?php
-namespace Trois\Utils\Model\Behavior;
-
-use Cake\ORM\Query;
-use Cake\I18n\I18n;
-use Cake\ORM\Behavior\TranslateBehavior as BaseBehavior;
-
-class TranslateBehavior extends BaseBehavior
-{
-  public function findTranslations(Query $query, array $options)
-  {
-    $this->locale(I18n::defaultLocale());
-    return parent::findTranslations($query,$options);
-  }
-}
+// @deprecated Backward compatibility alias
+class_alias('Trois\Utils\ORM\Behavior', 'Trois\Utils\Model\Behavior');
+deprecationWarning('Use Trois\Utils\ORM\Behavior instead of Trois\Utils\Model\Behavior.');
