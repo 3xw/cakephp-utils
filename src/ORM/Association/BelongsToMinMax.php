@@ -45,29 +45,33 @@ class BelongsToMinMax extends HasOneMinMax
 
       // additionnal join
       $joinType = empty($options['joinType']) ? $this->getJoinType() : $options['joinType'];
-      $joinAlias = 'T'.$this->getTarget()->getAlias();
+      $j2Alias = 'T'.$this->getTarget()->getAlias();
 
       // Logic
       $field = $this->_field;
 
       // CREATE JOIN
-      $subquery = $jTable->find();
+      $subquery = $this->getTarget()->find();
       $subquery->select([$tfKey => "$jAlias.$tfKey",$fKey => "$jAlias.$fKey"]);
 
       // target table JOIN
       $fields = array_diff($this->getTarget()->getSchema()->columns(),[$field]);
-      foreach($fields as $f) $subquery->select([$f => "$joinAlias.$f"]);
+      foreach($fields as $f) $subquery->select([$f => "$tAlias.$f"]);
       $subquery
       ->select([
-        $field => ($this->_type)? $subquery->func()->max("$joinAlias.$field"): $subquery->func()->min("$joinAlias.$field")
+        $field => ($this->_type)? $subquery->func()->max("$tAlias.$field"): $subquery->func()->min("$tAlias.$field")
       ])
       ->join([
-        'table' => $tName,
-        'alias' => $joinAlias,
+        'table' => $jName,
+        'alias' => $jAlias,
         'type' => $this->_joinType,
-        'conditions' => "$jAlias.$tfKey = $joinAlias.$tKey",
+        'conditions' => "$jAlias.$tfKey = $tAlias.$tKey",
       ])
-      ->group(["$jAlias.$fKey"]);
+      ->group([
+        "$tAlias.$tKey",
+        "$jAlias.$tfKey",
+        "$jAlias.$fKey"
+      ]);
 
       // associate...
       $query->join([
