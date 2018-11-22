@@ -13,14 +13,19 @@ use Cake\Auth\BasicAuthenticate AS CakeBasicAuthenticate;
 class BasicToJwtBearerAuthenticate extends CakeBasicAuthenticate
 {
   protected $_defaultConfig = [
+    'fields' => [
+        'username' => 'username',
+        'password' => 'password'
+    ],
+    'userModel' => 'Users',
+    'scope' => [],
+    'finder' => 'all',
+    'contain' => null,
+    'passwordHasher' => 'Default',
+
     'field' => 'id',
     'duration' => 3600,
     'headerKey' => 'X-Token',
-    'userModel' => 'Users',
-    'fields' => [
-      'password' => 'password',
-      'username' => 'username',
-    ]
   ];
 
   public function afterIdentify(Event $event, array $user)

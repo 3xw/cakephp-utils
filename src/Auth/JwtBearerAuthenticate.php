@@ -22,15 +22,20 @@ class JwtBearerAuthenticate extends CakeBasicAuthenticate
   protected $_error;
 
   protected $_defaultConfig = [
+    'fields' => [
+        'username' => 'id',
+        'password' => 'password'
+    ],
     'userModel' => 'Users',
+    'scope' => [],
+    'finder' => 'all',
+    'contain' => null,
+    'passwordHasher' => 'Default',
+    
     'header' => 'authorization',
     'prefix' => 'bearer',
     'parameter' => 'token',
     'queryDatasource' => true,
-    'fields' => [
-      'username' => 'id',
-      'password' => 'password'
-    ],
     'unauthenticatedException' => '\Cake\Http\Exception\UnauthorizedException',
     'key' => null,
     'allowedAlgs' => ['HS256']
