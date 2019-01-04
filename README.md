@@ -88,7 +88,7 @@ In src/Application.php
 	    ]);
 		}
 	}
-	
+
 
 ## Shell
 
@@ -328,7 +328,7 @@ This will create or delete view renders as cache ( html/json /etc...)
 	<?php
 	namespace App;
 	...
-	use Awallef\Cache\Middleware\ResponseCacheMiddleware;
+	use Trois\Utils\Middleware\ResponseCacheMiddleware;
 
 	class Application extends BaseApplication
 	{
