@@ -33,7 +33,6 @@ class TwoFactorAuthenticate extends FormAuthenticate
     ],
     'code' => [
       'length' => 8,
-      'field' => 'code',
       'passwordHasher' => 'Default'
     ],
     'token' => [
@@ -79,11 +78,11 @@ class TwoFactorAuthenticate extends FormAuthenticate
     return true;
   }
 
-  protected function _decode(ServerRequest $request)
+  protected function _decode($token)
   {
     $config = $this->_config;
     try {
-      $payload = JWT::decode($request->getData($this->getConfig('token.field')), Security::salt(), $this->getConfig('token.allowedAlgs'));
+      $payload = JWT::decode($token, Security::salt(), $this->getConfig('token.allowedAlgs'));
       return $payload;
     } catch (ExpiredException $e) {
       $this->_registry->getController()->Flash->error($e->getMessage());
@@ -110,7 +109,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
     $formAuth = $this->_checkFields($request, $this->getConfig('fields'));
 
     // look for token auth fields
-    $tokenCodeAuth = $this->_checkFields($request, [$this->getConfig('token.field'), $this->getConfig('code.field')]);
+    $tokenCodeAuth = $this->_checkFields($request, ['code']);
 
     // if none
     if(!$formAuth && !$tokenCodeAuth) return false;
@@ -138,31 +137,34 @@ class TwoFactorAuthenticate extends FormAuthenticate
 
       // set redirect to verify action and flash message
       $this->_registry->getController()->Flash->success($this->_transmitter->getConfig('messages.success'));
-      $pass = ['?' => [
-        'tokenfield' => $this->getConfig('token.field'),
-        'codefield' => $this->getConfig('code.field'),
-        'challenge' => $this->token
-      ]];
-      $response = $response->withLocation(Router::url($this->getConfig('verifyAction') + $pass, true));
-      //$response = $response->withHeader('WWW-Authenticate','Bearer');
+      $response = $response->withLocation(Router::url($this->getConfig('verifyAction'), true));
       $this->_registry->getController()->setResponse($response);
-
-      // prevent Auth to store incomplete processed user
       $this->_registry->getController()->Auth->config('storage','Memory');
+
+      // set session challenge
+      $request->getSession()->write('TwoFactorAuthenticate.token', $this->token);
+
+      // just say no!
+      return false;
     }
 
     // token + code Auth
     if($tokenCodeAuth)
     {
       // read token
-      if(!$payload = $this->_decode($request)) return false;
+      $token = $request->getSession()->read('TwoFactorAuthenticate.token');
+      if(empty($token)) return false;
+      if(!$payload = $this->_decode($request->getSession()->read('TwoFactorAuthenticate.token'))) return false;
 
       // look for user
       if (!$user = $this->_query($payload->username)->first()) return false;
       $user = $user->toArray();
 
+      $request->getSession()->delete('TwoFactorAuthenticate.token');
+
+
       // test code
-      $password = $request->getData($this->getConfig('code.field'));
+      $password = $request->getData('code');
       if (!$hasher->check($password, $payload->code)) return false;
 
       // set Bearer token for BearerTokenAuth
