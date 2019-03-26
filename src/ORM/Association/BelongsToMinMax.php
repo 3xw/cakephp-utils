@@ -14,6 +14,10 @@ class BelongsToMinMax extends HasOneMinMax
 
   protected $_targetForeignKey;
 
+  protected $_joinExtraConditions;
+
+  protected $_joinAlias;
+
   public function __construct($alias, array $options = [])
   {
     parent::__construct($alias, $options);
@@ -21,6 +25,10 @@ class BelongsToMinMax extends HasOneMinMax
     if(empty($options['targetForeignKey']) || empty($options['joinTable'])) throw new RuntimeException('You must provide a targetForeignKey and a  joinTablefor BelongsToMinMax Association');
     $this->_targetForeignKey = $options['targetForeignKey'];
     $this->_junctionTableName = $options['joinTable'];
+
+    // extra stuff
+    $this->_joinExtraConditions = empty($options['joinExtraConditions'])? []: $options['joinExtraConditions'];
+    $this->_joinAlias = empty($options['joinAlias'])? false: $options['joinAlias'];
   }
 
   public function attachTo(Query $query, array $options = [])
@@ -39,7 +47,7 @@ class BelongsToMinMax extends HasOneMinMax
 
       // Join sub query
       $jName = $this->_junctionTableName;
-      $jAlias = strtoupper(substr($sAlias,0,1).substr($tName,0,1));
+      $jAlias = $this->_joinAlias? $this->_joinAlias: strtoupper(substr($sAlias,0,1).substr($tName,0,1));
       $jTable = TableRegistry::get($jAlias, ['table' => $jName]);
       $fKey = $this->getForeignKey();
 
@@ -65,7 +73,7 @@ class BelongsToMinMax extends HasOneMinMax
         'table' => $jName,
         'alias' => $jAlias,
         'type' => $this->_joinType,
-        'conditions' => "$jAlias.$tfKey = $tAlias.$tKey",
+        'conditions' => ["$jAlias.$tfKey = $tAlias.$tKey"] + $this->_joinExtraConditions,
       ])
       ->group([
         "$tAlias.$tKey",

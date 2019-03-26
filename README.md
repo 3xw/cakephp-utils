@@ -62,6 +62,8 @@ In src/Application.php
 	      'targetForeignKey' => 'periode_id',
 	      'joinTable' => 'subscriptions_periodes',
 	      'joinType' => 'LEFT'
+				'joinAlias' => 'SP', // extra stuff: define yourself join alias
+	      'joinExtraConditions' => ['SP.was_present' => true] // extra stuff: add conditions on join clause
 	    ]);
 		}
 	}
