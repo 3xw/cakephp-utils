@@ -76,8 +76,9 @@ class BelongsToMinMax extends HasOneMinMax
         'conditions' => ["$jAlias.$tfKey = $tAlias.$tKey"] + $this->_joinExtraConditions,
       ])
       ->group([
-        "$tAlias.$tKey",
-        "$jAlias.$tfKey",
+        //"$tAlias.$tKey",
+        //"$jAlias.$tfKey",
+        // Only on association should match
         "$jAlias.$fKey"
       ]);
 
