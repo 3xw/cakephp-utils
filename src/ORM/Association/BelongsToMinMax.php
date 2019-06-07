@@ -16,6 +16,8 @@ class BelongsToMinMax extends HasOneMinMax
 
   protected $_joinExtraConditions;
 
+  protected $_groupField;
+
   protected $_joinAlias;
 
   public function __construct($alias, array $options = [])
@@ -28,6 +30,7 @@ class BelongsToMinMax extends HasOneMinMax
 
     // extra stuff
     $this->_joinExtraConditions = empty($options['joinExtraConditions'])? []: $options['joinExtraConditions'];
+    $this->_groupField = empty($options['groupField'])? false: $options['groupField'];
     $this->_joinAlias = empty($options['joinAlias'])? false: $options['joinAlias'];
   }
 
@@ -57,6 +60,7 @@ class BelongsToMinMax extends HasOneMinMax
 
       // Logic
       $field = $this->_field;
+      $logic = sprintf($this->_types[$this->_type], $field);
 
       // CREATE JOIN
       $subquery = $this->getTarget()->find();
@@ -66,9 +70,7 @@ class BelongsToMinMax extends HasOneMinMax
       $fields = array_diff($this->getTarget()->getSchema()->columns(),[$field]);
       foreach($fields as $f) $subquery->select([$f => "$tAlias.$f"]);
       $subquery
-      ->select([
-        $field => ($this->_type)? $subquery->func()->max("$tAlias.$field"): $subquery->func()->min("$tAlias.$field")
-      ])
+      ->select([$field => "$tAlias.$field"])
       ->join([
         'table' => $jName,
         'alias' => $jAlias,
@@ -81,6 +83,30 @@ class BelongsToMinMax extends HasOneMinMax
         // Only on association should match
         "$jAlias.$fKey"
       ]);
+
+      if($this->_groupField)
+      {
+        $subquery->join([
+          'table' =>"(SELECT $logic AS `$field`, $this->_groupField FROM $tName GROUP BY $this->_groupField )",
+          'alias' => 'MinMax',
+          'type' => 'INNER',
+          'conditions' => [
+            "MinMax.$field" => "$tAlias.$field",
+            "MinMax.$this->_groupField" => "$tAlias.$this->_groupField"
+          ],
+        ]);
+      }
+      else
+      {
+        $subquery->join([
+          'table' =>"(SELECT $logic AS `$field`FROM $tName )",
+          'alias' => 'MinMax',
+          'type' => 'INNER',
+          'conditions' => [
+            "MinMax.$field" => "$tAlias.$field"
+          ],
+        ]);
+      }
 
       // associate...
       $query->join([
