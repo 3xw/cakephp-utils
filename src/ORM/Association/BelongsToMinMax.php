@@ -91,8 +91,8 @@ class BelongsToMinMax extends HasOneMinMax
           'alias' => 'MinMax',
           'type' => 'INNER',
           'conditions' => [
-            "MinMax.$field" => "$tAlias.$field",
-            "MinMax.$this->_groupField" => "$tAlias.$this->_groupField"
+            "MinMax.$field = $tAlias.$field",
+            "MinMax.$this->_groupField = $tAlias.$this->_groupField"
           ],
         ]);
       }
@@ -103,7 +103,7 @@ class BelongsToMinMax extends HasOneMinMax
           'alias' => 'MinMax',
           'type' => 'INNER',
           'conditions' => [
-            "MinMax.$field" => "$tAlias.$field"
+            "MinMax.$field = $tAlias.$field"
           ],
         ]);
       }
