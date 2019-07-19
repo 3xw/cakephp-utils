@@ -3,8 +3,8 @@
   "description": "CakePHP utils plugins",
   "type": "cakephp-plugin",
   "require": {
-    "php": ">=5.5.9",
-    "cakephp/cakephp": "^3.5",
+    "php": ">=7.2",
+    "cakephp/cakephp": "4.x-dev",
     "firebase/php-jwt": "~5.0"
   },
   "require-dev": {
@@ -20,5 +20,6 @@
       "Trois\\Utils\\Test\\": "tests",
       "Cake\\Test\\": "./vendor/cakephp/cakephp/tests"
     }
-  }
+  },
+  "minimum-stability": "dev"
 }
