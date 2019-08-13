@@ -7,9 +7,9 @@ use Cake\ORM\Behavior\TranslateBehavior as BaseBehavior;
 
 class TranslateBehavior extends BaseBehavior
 {
-  public function findTranslations(Query $query, array $options)
+  public function findTranslations(Query $query, array $options): Query
   {
-    $this->locale(I18n::defaultLocale());
+    $this->setLocale(I18n::getDefaultLocale());
     return parent::findTranslations($query,$options);
   }
 }
