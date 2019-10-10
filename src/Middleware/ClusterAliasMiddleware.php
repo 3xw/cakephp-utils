@@ -8,6 +8,7 @@ use Cake\Core\InstanceConfigTrait;
 use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
+use Cake\Cache\Cache;
 
 class ClusterAliasMiddleware
 {
@@ -16,6 +17,8 @@ class ClusterAliasMiddleware
   protected $_defaultConfig = [
     'rules' => [
       [ // here we always use "reader" instead of "default" connection
+        'slave' => true,
+        'latency' => 1500, //milliseconds
         'from' => 'default',
         'to' => 'reader',
         'debug' => '*',
@@ -24,8 +27,8 @@ class ClusterAliasMiddleware
         'plugin' => '*',
         'controller' => '*',
         'action' => '*',
-        'extension' => '*'
-      ]
+        'extension' => '*',
+      ],
     ],
   ];
 
@@ -54,7 +57,36 @@ class ClusterAliasMiddleware
 
   protected function _execRule($request, $response)
   {
-    if($rule = $this->_checkRules($request, $response)) ConnectionManager::alias($rule->to, $rule->from);
+    $rule = $this->_checkRules($request, $response);
+    if(!$this->_checkLatency($rule) && $rule)
+    {
+      debug($rule);
+      ConnectionManager::alias($rule->to, $rule->from);
+    }
+  }
+
+  protected function _checkLatency($rule)
+  {
+    if(
+      !$rule ||
+      (
+        ($rule = (object) array_merge($this->_defaultConfig['rules'][0], (array) $rule)) &&
+        !$rule->slave
+      )
+    ) return !$this->_write();
+
+    return $this->_hasLatency($rule);
+  }
+
+  protected function _write()
+  {
+    return Cache::write('ClusterAliasMiddleware',  (int) (microtime(true) * 1000), '_cake_core_');
+  }
+
+  protected function _hasLatency($rule)
+  {
+    if(!(int) $lastAction = Cache::read('ClusterAliasMiddleware', '_cake_core_')) return false;
+    return $lastAction + $rule->latency >= (int) (microtime(true) * 1000);
   }
 
   protected function _checkRules($request, $response)
