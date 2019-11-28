@@ -99,13 +99,14 @@ class ClusterAliasMiddleware
   {
     $debug = Configure::read('debug');
     $method = $request->getMethod();
-    $plugin = $request->plugin;
-    $controller = $request->controller;
-    $action = $request->action;
+    $params = $request->getAttribute('params');
+    $plugin = $params['plugin'];
+    $controller = $params['controller'];
+    $action = $params['action'];
     $prefix = null;
     $extension = null;
-    if (!empty($request->params['prefix'])) $prefix = $request->params['prefix'];
-    if (!empty($request->params['_ext'])) $extension = $request->params['_ext'];
+    if (!empty($request->params['prefix'])) $prefix = $params['prefix'];
+    if (!empty($request->params['_ext'])) $extension = $params['_ext'];
 
     if (
       $this->_matchOrAsterisk($rule, 'debug', $debug, true) &&
