@@ -2,7 +2,7 @@
 namespace Trois\Utils\Auth;
 
 use Trois\Utils\Utility\Crypto\Base64Url;
-use Trois\Utils\Utility\Crypto\Mcrypt;
+use Cake\Utility\Crypto\OpenSsl;
 use Cake\Utility\Security;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
@@ -34,7 +34,7 @@ class LegacyTokenAuthenticate extends BaseAuthenticate
     {
       $cipher = $request->getHeader('API-TOKEN')? $request->getHeader('API-TOKEN'): $request->getHeader('X-API-TOKEN');
       $cipher = Base64Url::decode($cipher[0]);
-      Security::engine(new Mcrypt());
+      Security::engine(new OpenSsl());
       $username = Security::decrypt($cipher, $this->getConfig('key'), $this->getConfig('salt'));
       $user = $this->_findUser($username);
 
