@@ -37,7 +37,7 @@ class SluggableBehavior extends Behavior
   {
     $config = $this->getConfig();
     $slug = $config['slug'];
-    $validator->requirePresence($slug, false)->allowEmpty($slug);
+    $validator->requirePresence($slug, false)->allowEmptyString($slug);
   }
 
   public function beforeSave(Event $event, EntityInterface $entity, ArrayObject $options)
