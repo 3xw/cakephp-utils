@@ -105,7 +105,7 @@ class SluggableBehavior extends Behavior
     if($locale)
     {
       $query = "SELECT $f AS `slug`, CONVERT(REPLACE($f, '$slug-', ''), UNSIGNED INTEGER) AS `dupes` FROM $tableName "
-        ."WHERE $f LIKE '$slug%' AND locale = '$locale' AND model = '".$this->_table->alias()."' AND foreign_key != $id AND field = '$field' "
+        ."WHERE $f LIKE '$slug%' AND locale = '$locale' AND model = '".$this->_table->getAlias()."' AND foreign_key != $id AND field = '$field' "
         ."ORDER BY `dupes` DESC LIMIT 1 OFFSET 0";
     }else{
       $query = "SELECT $f AS `slug`, CONVERT(REPLACE($f, '$slug-', ''), UNSIGNED INTEGER) AS `dupes` FROM $tableName "
