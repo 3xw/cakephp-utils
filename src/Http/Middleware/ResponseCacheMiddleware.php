@@ -1,16 +1,21 @@
 <?
-namespace Trois\Utils\Middleware;
+namespace Trois\Utils\Http\Middleware;
 
-use Cake\Cache\Cache;
-use Cake\Log\Log;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Cake\Core\InstanceConfigTrait;
 use Cake\Core\Configure;
 use Cake\Core\Exception\Exception;
-use Trois\Utils\Utility\Html\Compressor;
+use Cake\Cache\Cache;
+use Cake\Log\Log;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
+use Trois\Utils\Utility\Html\Compressor;
+use Trois\Utils\Utility\Http\RequestMatchRule;
 
-class ResponseCacheMiddleware
+class ResponseCacheMiddleware implements MiddlewareInterface
 {
   use InstanceConfigTrait;
 
@@ -22,6 +27,20 @@ class ResponseCacheMiddleware
   protected $_ruleKey = -1;
 
   protected $_compressor;
+
+  public function __construct(array $config = [])
+  {
+    $this->setConfig($config);
+  }
+
+  public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+  {
+    $response = $handler->handle($request);
+    $this->_init();
+    $this->_execRule($request, $response);
+
+    return $response;
+  }
 
   protected function _init()
   {
@@ -38,19 +57,10 @@ class ResponseCacheMiddleware
     $this->config('rules', Configure::read('Trois.cache.rules'));
   }
 
-  public function __invoke($request, $response, $next)
-  {
-    $response = $next($request, $response);
-    $this->_init();
-    $this->_execRule($request, $response);
-
-    return $response;
-  }
-
-  public function checkRules($request, $response)
+  public function checkRules($request)
   {
     $this->_init();
-    return $this->_checkRules($request, $response);
+    return $this->_checkRules($request);
   }
 
   public function deleteMatchedRule()
@@ -66,8 +76,19 @@ class ResponseCacheMiddleware
 
   protected function _execRule($request, $response)
   {
-    $rule = $this->_checkRules($request, $response);
-    if($rule){
+    $rule = $this->_checkRules($request);
+    if($rule)
+    {
+      // setup rule default
+      $rule = array_merge($rule, [
+        'skip' => Hash::get($rule, 'skip'),
+        'cache' => Hash::get($rule, 'cache'),
+        'clear' => Hash::get($rule, 'clear'),
+        'key' => Hash::get($rule, 'key'),
+        'compress' => Hash::get($rule, 'compress'),
+      ]);
+      foreach($rule as $key => &$value) $value = $this->_getRuleBoolProperty($request, $rule, $key);
+
       if($rule['clear'] && !$rule['skip']){
         if(is_array($rule['key'])){
           foreach($rule['key'] as $key){
@@ -113,56 +134,9 @@ class ResponseCacheMiddleware
     return $this->compressor()->compress($content);
   }
 
-  protected function _checkRules($request, $response)
+  protected function _checkRules($request)
   {
-    $rules = $this->config('rules');
-    foreach ($rules as $key => $rule) {
-      $rule = $this->_matchRule($rule, $request, $response);
-      if ($rule !== null) {
-        $this->_ruleKey = $key;
-        return $rule;
-      }
-    }
-    return false;
-  }
-
-  protected function _matchRule($rule, $request, $response)
-  {
-    $method = $request->getMethod();
-    $plugin = $request->plugin;
-    $controller = $request->controller;
-    $action = $request->action;
-    $code = $response->statusCode();
-    $prefix = null;
-    $extension = null;
-    if (!empty($request->params['prefix'])) {
-      $prefix = $request->params['prefix'];
-    }
-    if (!empty($request->params['_ext'])) {
-      $extension = $request->params['_ext'];
-    }
-
-    if ($this->_matchOrAsterisk($rule, 'method', $method, true) &&
-    $this->_matchOrAsterisk($rule, 'code', $code, true) &&
-    $this->_matchOrAsterisk($rule, 'prefix', $prefix, true) &&
-    $this->_matchOrAsterisk($rule, 'plugin', $plugin, true) &&
-    $this->_matchOrAsterisk($rule, 'extension', $extension, true) &&
-    $this->_matchOrAsterisk($rule, 'controller', $controller) &&
-    $this->_matchOrAsterisk($rule, 'action', $action)) {
-
-      $rule = [
-        'skip' => Hash::get($rule, 'skip'),
-        'cache' => Hash::get($rule, 'cache'),
-        'clear' => Hash::get($rule, 'clear'),
-        'key' => Hash::get($rule, 'key'),
-        'compress' => Hash::get($rule, 'compress'),
-      ];
-      foreach($rule as $key => &$value){
-        $value = $this->_getRuleBoolProperty($request, $rule, $key);
-      }
-      return $rule;
-    }
-    return null;
+    return (new RequestMatchRule())->checkRules($this->getConfig('rules'), $request);
   }
 
   protected function _getRuleBoolProperty($request, $rule, $key)
@@ -190,20 +164,4 @@ class ResponseCacheMiddleware
       return $prop;
     }
   }
-
-  protected function _matchOrAsterisk($permission, $key, $value, $allowEmpty = false)
-  {
-    $possibleValues = (array)Hash::get($permission, $key);
-    if ($allowEmpty && empty($possibleValues) && $value === null) {
-      return true;
-    }
-    if (Hash::get($permission, $key) === '*' ||
-    in_array($value, $possibleValues) ||
-    in_array(Inflector::camelize($value, '-'), $possibleValues)) {
-      return true;
-    }
-
-    return false;
-  }
-
 }

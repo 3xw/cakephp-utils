@@ -1,9 +1,13 @@
 <?php
-namespace Trois\Utils\Middleware;
+namespace Trois\Utils\Http\Middleware;
 
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Cake\Core\InstanceConfigTrait;
 
-class CorsMiddleware
+class CorsMiddleware implements MiddlewareInterface
 {
   use InstanceConfigTrait;
 
@@ -24,14 +28,16 @@ class CorsMiddleware
     $this->setConfig($config);
   }
 
-  public function __invoke($request, $response, $next)
+  public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
   {
+    $response =  $handler->handle($request);
+
     if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS')
     {
       $response = $this->_setHeaders($response);
 
       if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD'])) {
-        $response = $response->withHeader('Access-Control-Allow-Methods', $this->config('options.methods'));
+        $response = $response->withHeader('Access-Control-Allow-Methods', $this->getConfig('options.methods'));
       }
 
       if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS'])) {
@@ -44,7 +50,6 @@ class CorsMiddleware
 
     }else{
 
-      $response = $next($request, $response);
       $response = $this->_setHeaders($response);
     }
 
