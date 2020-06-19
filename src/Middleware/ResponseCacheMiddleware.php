@@ -43,7 +43,6 @@ class ResponseCacheMiddleware
     $response = $next($request, $response);
     $this->_init();
     $this->_execRule($request, $response);
-
     return $response;
   }
 
@@ -202,7 +201,7 @@ class ResponseCacheMiddleware
     in_array(Inflector::camelize($value, '-'), $possibleValues)) {
       return true;
     }
-
+    debug($key.': '.$value);
     return false;
   }
 
