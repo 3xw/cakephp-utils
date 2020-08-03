@@ -40,8 +40,6 @@ class RequestDetectorConfigureModifierMiddleware implements MiddlewareInterface
       }
     }
 
-    debug(Configure::read());
-
     return $handler->handle($request);
   }
 }
