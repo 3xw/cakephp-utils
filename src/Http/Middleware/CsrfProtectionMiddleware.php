@@ -20,7 +20,7 @@ class CsrfProtectionMiddleware extends BasMiddleware
       throw new Exception(__('Missing configuration file: "config/{0}.php"!!!', $key), 1);
     }
 
-    $this->whitelistCallback(Closure::fromCallable([$this, 'whitelistHandler']));
+    $this->skipCheckCallback(Closure::fromCallable([$this, 'whitelistHandler']));
   }
 
   public function whitelistHandler(ServerRequestInterface $request)
