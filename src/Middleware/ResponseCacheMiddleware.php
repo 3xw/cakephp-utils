@@ -201,7 +201,7 @@ class ResponseCacheMiddleware
     in_array(Inflector::camelize($value, '-'), $possibleValues)) {
       return true;
     }
-    debug($key.': '.$value);
+    //debug($key.': '.$value);
     return false;
   }
 
