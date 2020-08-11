@@ -7,16 +7,31 @@ use Cake\ORM\Behavior;
 use Cake\ORM\Table;
 use CakeDC\Users\Model\Behavior\RegisterBehavior as CakeDCRegisterBehavior;
 use Cake\Core\Configure;
+use Cake\Utility\Text;
 
 /**
  * Register behavior
  */
 class RegisterBehavior extends CakeDCRegisterBehavior
 {
-
   public function initialize(array $config): void
   {
       parent::initialize($config);
+  }
+
+  public function registerFromAdmin($user, $data, $options = [])
+  {
+    $options = array_merge(['validate_email' => false,'use_tos' => false], $options);
+    $password = $data['password']?? $this->_generateRandomPassword();
+    $data['password'] = $data['password_confirm'] = $password;
+    if(!$user = $this->register($user, $data, $options)) return false;
+
+    return $user->set('originalPassword',$password);
+  }
+
+  protected function _generateRandomPassword()
+  {
+      return str_replace('-', '', Text::uuid());
   }
 
   public function register($user, $data, $options)
