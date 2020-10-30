@@ -5,7 +5,7 @@ use Closure;
 use Psr\Http\Message\ServerRequestInterface;
 use Cake\Core\Configure;
 use Cake\Http\Middleware\CsrfProtectionMiddleware as BasMiddleware;
-use Trois\Utils\Utility\Http\RequestMatchRule;
+use Trois\Utils\Http\RequestMatchRule;
 
 class CsrfProtectionMiddleware extends BasMiddleware
 {

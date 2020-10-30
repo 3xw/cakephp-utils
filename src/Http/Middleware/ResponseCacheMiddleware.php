@@ -13,7 +13,7 @@ use Cake\Log\Log;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Trois\Utils\Utility\Html\Compressor;
-use Trois\Utils\Utility\Http\RequestMatchRule;
+use Trois\Utils\Http\RequestMatchRule;
 
 class ResponseCacheMiddleware implements MiddlewareInterface
 {

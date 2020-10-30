@@ -11,7 +11,7 @@ use Cake\Datasource\ConnectionManager;
 use Cake\Utility\Hash;
 use Cake\Utility\Inflector;
 use Cake\Cache\Cache;
-use Trois\Utils\Utility\Http\RequestMatchRule;
+use Trois\Utils\Http\RequestMatchRule;
 
 class ClusterAliasMiddleware implements MiddlewareInterface
 {
@@ -50,7 +50,7 @@ class ClusterAliasMiddleware implements MiddlewareInterface
 
   protected function _init()
   {
-    if(empty(Configure::read('ClusterAliasRules')))
+    if(empty(Configure::read('Trois.clusterAlias.rules')))
     {
       $key = 'cluster_alias_rules';
       try {
@@ -60,7 +60,7 @@ class ClusterAliasMiddleware implements MiddlewareInterface
       }
     }
 
-    $this->setConfig('rules', Configure::read('ClusterAliasRules'));
+    $this->setConfig('rules', Configure::read('Trois.clusterAlias.rules'));
   }
 
   protected function _execRule($request)
@@ -68,7 +68,7 @@ class ClusterAliasMiddleware implements MiddlewareInterface
     $rule = (new RequestMatchRule())->checkRules($this->getConfig('rules'), $request);
     if(!$this->_checkLatency($rule) && $rule)
     {
-      debug($rule);
+      $rule = (object) $rule;
       ConnectionManager::alias($rule->to, $rule->from);
     }
   }

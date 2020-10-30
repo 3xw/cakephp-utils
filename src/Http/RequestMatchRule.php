@@ -1,5 +1,5 @@
 <?php
-namespace Trois\Utils\Utility\Http;
+namespace Trois\Utils\Http;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Cake\Core\Configure;

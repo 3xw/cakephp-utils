@@ -13,7 +13,7 @@ class RequestDetectorHandler extends DefaultRedirectHandler
   public function handle(Exception $exception, ServerRequestInterface $request, array $options = []): ResponseInterface
   {
     $options += $this->defaultOptions;
-
+    debug('yo');
     if(!empty($options['detectors']))
     {
       foreach($options['detectors'] as $detector => $config)
