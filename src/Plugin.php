@@ -15,6 +15,7 @@ class Plugin extends BasePlugin
   public function console($commands)
   {
     // Add console commands here.
+    $commands = parent::console($commands);
     return $commands;
   }
 
