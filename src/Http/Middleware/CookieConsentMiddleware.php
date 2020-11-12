@@ -14,16 +14,11 @@ class CookieConsentMiddleware implements MiddlewareInterface
 {
   use StaticConfigTrait;
 
-  protected $_config = [
-    'cookieName' => 'cookieconsent_status',
-    'value' => 'allow',
-  ];
-
   public static $allow = false;
 
   public static function removeConsentCookie()
   {
-    setcookie(self::getConfig('cookieName'), "", time() - 3600); 
+    setcookie(self::getConfig('cookieName'), "", time() - 3600);
   }
 
   public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
