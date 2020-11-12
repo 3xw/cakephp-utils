@@ -39,7 +39,7 @@ class SocialPostsSyncShell extends Shell
           $post['provider'] = $media;
           $post['full_data'] = json_encode($data);
           $post['date'] = ($data->taken_at_timestamp)? date("Y-m-d H:i:s", $data->taken_at_timestamp) : null;
-          $post['link'] = 'https://www.instagram.com/p/'.$data->id;
+          $post['link'] = 'https://www.instagram.com/p/'.$data->shortcode;
           $post['message'] = $data->edge_media_to_caption->edges[0]->node->text ?? null;
 
           if($type == 'account'){
