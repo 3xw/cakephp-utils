@@ -33,6 +33,9 @@ class CookieConsentMiddleware implements MiddlewareInterface
     }
 
     self::$allow = false;
+    try {
+      ini_set('session.use_cookies', '0');
+    } catch (\Exception $e) {}
     $response = $handler->handle($request);
     $response = $response->withCookieCollection(new CookieCollection());
     return $response;
