@@ -16,11 +16,6 @@ class CookieConsentMiddleware implements MiddlewareInterface
 
   public static $allow = true;
 
-  public static function removeConsentCookie()
-  {
-    setcookie(self::getConfig('cookieName'), "", time() - 3600);
-  }
-
   public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
   {
     $cookies = $request->getCookieParams();
