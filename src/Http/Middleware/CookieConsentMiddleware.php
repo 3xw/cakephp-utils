@@ -14,7 +14,7 @@ class CookieConsentMiddleware implements MiddlewareInterface
 {
   use StaticConfigTrait;
 
-  public static $allow = false;
+  public static $allow = true;
 
   public static function removeConsentCookie()
   {
