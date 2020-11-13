@@ -14,6 +14,8 @@ class CookieConsentMiddleware implements MiddlewareInterface
 {
   use StaticConfigTrait;
 
+  public static $exists = false;
+
   public static $allow = true;
 
   public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -21,10 +23,14 @@ class CookieConsentMiddleware implements MiddlewareInterface
     $cookies = $request->getCookieParams();
     $cookieData = Hash::get($cookies, self::getConfig('cookieName'));
 
-    if (is_string($cookieData) && strlen($cookieData) > 0 && $cookieData == self::getConfig('value'))
+    if (is_string($cookieData) && strlen($cookieData) > 0)
     {
-      self::$allow = true;
-      return $handler->handle($request);
+      self::$exists = true;
+      if($cookieData == self::getConfig('value'))
+      {
+        self::$allow = true;
+        return $handler->handle($request);
+      }
     }
 
     self::$allow = false;
