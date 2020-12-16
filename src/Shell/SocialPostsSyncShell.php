@@ -3,6 +3,7 @@ namespace Trois\Utils\Shell;
 
 use Cake\Core\Configure;
 use Cake\Console\Shell;
+use Phpfastcache\Helper\Psr16Adapter;
 
 class SocialPostsSyncShell extends Shell
 {
@@ -19,7 +20,9 @@ class SocialPostsSyncShell extends Shell
       case 'instagram':
 
       if($type == 'account'){
-        $instagram = new \InstagramScraper\Instagram(new \GuzzleHttp\Client());
+        $instagram = \InstagramScraper\Instagram::withCredentials(new \GuzzleHttp\Client(), $config['instagram']['username'], $config['instagram']['password'], new Psr16Adapter('Files'));
+        $instagram->login();
+        $instagram->saveSession();
         $datas = $instagram->getMedias($key);
 
         foreach($datas as $dataKey => $data){
