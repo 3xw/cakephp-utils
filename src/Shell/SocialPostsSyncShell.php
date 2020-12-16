@@ -7,52 +7,38 @@ use Cake\Console\Shell;
 class SocialPostsSyncShell extends Shell
 {
 
-  public function main($media, $type, $key, $outputModel = 'SocialPosts', $limit = 10)
+  public function main($media, $type, $key, $outputModel = 'SocialPosts', $limit = 100)
   {
 
-    $config = Configure::read('Socials');
+    $config = Configure::read('Api');
     $posts = [];
 
     $this->out('Loading Posts form '.$key.' on '.$media);
 
     switch($media){
       case 'instagram':
-      if($type == 'account'){
-        $feedUrl = 'https://www.instagram.com/'.$key.'/?__a=1';
-      }elseif($type == 'search'){
-        $feedUrl = 'https://www.instagram.com/explore/tags/'.$key.'/?__a=1';
-      }
-
-      $queryPosts = json_decode(file_get_contents($feedUrl));
 
       if($type == 'account'){
-        $datas = $queryPosts->graphql->user->edge_owner_to_timeline_media->edges;
-      }elseif($type == 'search'){
-        $datas = $queryPosts->graphql->hashtag->edge_hashtag_to_media->edges;
-      }
+        $instagram = new \InstagramScraper\Instagram(new \GuzzleHttp\Client());
+        $datas = $instagram->getMedias($key);
 
-      foreach($datas as $dataKey => $data){
-        if($dataKey < $limit){
-          $data = $data->node;
-          $post = [];
-          $post['id'] = $media.$data->id;
-          $post['provider'] = $media;
-          $post['full_data'] = json_encode($data);
-          $post['date'] = ($data->taken_at_timestamp)? date("Y-m-d H:i:s", $data->taken_at_timestamp) : null;
-          $post['link'] = 'https://www.instagram.com/p/'.$data->shortcode;
-          $post['message'] = $data->edge_media_to_caption->edges[0]->node->text ?? null;
+        foreach($datas as $dataKey => $data){
+          if($dataKey < $limit){
+            $post = [];
+            $post['id'] = $media.$data->getId();
+            $post['provider'] = $media;
+            $post['full_data'] = 'none';
+            $post['date'] = ($data->getCreatedTime())? date("Y-m-d H:i:s", $data->getCreatedTime()) : null;
+            $post['link'] = 'https://www.instagram.com/p/'.$data->getShortCode();
+            $post['message'] = $data->getCaption() ?? null;
+            $post['author'] = $data->getOwner()->getUsername();
+            $post['attachment'] = ($data->getType() == 'video')? $data->getVideoStandardResolutionUrl() : $data->getImageHighResolutionUrl();
 
-          if($type == 'account'){
-            $post['author'] = $queryPosts->graphql->user->full_name;
-            $post['attachment'] = ($data->is_video)? $data->video_url : $data->display_url;
-          }elseif($type == 'search'){
-            $post['author'] = $data->owner->username;
-            $post['attachment'] = ($data->is_video)? $data->video_url : $data->thumbnail_src;
+            $posts[] = $post;
           }
-
-          $posts[] = $post;
         }
       }
+
       break;
     }
 
@@ -62,6 +48,7 @@ class SocialPostsSyncShell extends Shell
     if(!$model) $this->abort('Model not found');
 
     $entities = $model->newEntities($posts);
+
     if($model->saveMany($entities)){
       $this->out('New Posts saved');
     }else{
