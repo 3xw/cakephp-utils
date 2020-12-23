@@ -15,5 +15,5 @@ class BaseListener implements ListenerInterface
     $this->setConfig($config);
   }
 
-  public function respond(Event $event): void {}
+  public function respond(Event $event) {}
 }

@@ -5,5 +5,5 @@ use Cake\Event\Event;
 
 interface ListenerInterface
 {
-  public function respond(Event $event): void;
+  public function respond(Event $event);
 }

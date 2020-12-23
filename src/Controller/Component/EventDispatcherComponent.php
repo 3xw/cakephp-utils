@@ -8,6 +8,7 @@ use Cake\Controller\ComponentRegistry;
 use Cake\Event\EventInterface;
 use Cake\Event\Event;
 use Cake\Event\EventDispatcherTrait;
+use Cake\Http\Response;
 
 use Trois\Utils\Listener\ListenerInterface;
 
@@ -54,7 +55,6 @@ class EventDispatcherComponent extends Component
     if(!array_key_exists($name, $this->getConfig('listeners'))) return;
 
     // add request to event
-    $subject = clone $event->getSubject();
     $listeners = $this->getConfig('listeners')[$name];
 
     // exec listeners
@@ -62,12 +62,13 @@ class EventDispatcherComponent extends Component
     {
       $config = is_array($value)? $value: [];
       $listener = is_array($value)? $key: $value;
-      $this->callListenerResponderMethod($listener, $config, $name, $subject);
+      $listenerInstance =  new $listener($config);
+      $this->callListenerResponderMethod($listenerInstance, $event);
     }
   }
 
-  protected function callListenerResponderMethod(ListenerInterface $listener, array $config, string $name, $subject): void
+  protected function callListenerResponderMethod(ListenerInterface $listener, Event $event): void
   {
-    (new $listener($config))->respond(new Event($name, $subject));
+    $listener->respond($event);
   }
 }
