@@ -64,6 +64,7 @@ class EventDispatcherComponent extends Component
       $listener = is_array($value)? $key: $value;
       $listenerInstance =  new $listener($config);
       $this->callListenerResponderMethod($listenerInstance, $event);
+      if($event->isStopped()) break;
     }
   }
 
