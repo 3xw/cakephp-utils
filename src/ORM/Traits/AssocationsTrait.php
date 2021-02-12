@@ -3,17 +3,25 @@ namespace Trois\Utils\ORM\Traits;
 
 use Trois\Utils\ORM\Association\HasOneMinMax;
 use Trois\Utils\ORM\Association\BelongsToMinMax;
+use Trois\Utils\ORM\Association\HasOneMultiBindings;
 
-trait MinMaxAssocationTrait
+trait AssocationsTrait
 {
-  public function hasOneMinMax($associated, array $options = [])
+  public function HasOneMultiBindings($associated, array $options = [])
+  {
+    $options += ['sourceTable' => $this];
+    $association = $this->_associations->load(HasOneMultiBindings::class, $associated, $options);
+    return $association;
+  }
+
+  public function HasOneMinMax($associated, array $options = [])
   {
     $options += ['sourceTable' => $this];
     $association = $this->_associations->load(HasOneMinMax::class, $associated, $options);
     return $association;
   }
 
-  public function belongsToMinMax($associated, array $options = [])
+  public function BelongsToMinMax($associated, array $options = [])
   {
     $options += ['sourceTable' => $this];
     $association = $this->_associations->load(BelongsToMinMax::class, $associated, $options);

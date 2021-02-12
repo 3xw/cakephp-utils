@@ -30,7 +30,7 @@ class HasOneMinMax extends Association {
     $this->_field = $options['field'];
   }
 
-  public function attachTo(Query $query, array $options = [])
+  public function attachTo(Query $query, array $options = []): void
   {
 
     // Source

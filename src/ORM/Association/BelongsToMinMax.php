@@ -34,7 +34,7 @@ class BelongsToMinMax extends HasOneMinMax
     $this->_joinAlias = empty($options['joinAlias'])? false: $options['joinAlias'];
   }
 
-  public function attachTo(Query $query, array $options = [])
+  public function attachTo(Query $query, array $options = []): void
   {
 
     try {
