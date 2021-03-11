@@ -32,7 +32,7 @@ class ArrayObject extends Dady
   *
   * @return array
   */
-  protected function getArray($obj): array
+  public function getArray($obj): array
   {
     $array  = array(); // noisy $array does not exist
     $arrObj = is_object($obj) ? get_object_vars($obj) : $obj;
