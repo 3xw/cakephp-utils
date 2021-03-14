@@ -35,7 +35,7 @@ class SnsMessage extends Entity
     if($this->isSub()) return;
 
     $payload = $this->get('Message');
-    if(!$mustHave = Hash::get($payload, 'mustHave')) return;
+    if(!$mustHave = Hash::get($options, 'mustHave')) return;
 
     foreach($mustHave as $prop)
     {
