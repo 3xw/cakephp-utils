@@ -50,6 +50,12 @@ class SocialPostsSyncShell extends Shell
     $model = $this->loadModel($outputModel);
     if(!$model) $this->abort('Model not found');
 
+    foreach($posts as $key => $post){
+      if($model->find()->where([$outputModel.'.id' => $post['id']])->first() != NULL){
+        unset($posts[$key]);
+      }
+    }
+
     $entities = $model->newEntities($posts);
 
     if($model->saveMany($entities)){
