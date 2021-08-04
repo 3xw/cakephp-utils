@@ -5,25 +5,45 @@ use Cake\Routing\RouteBuilder;
 
 class Mapper
 {
-  static public function mapRessources($resources = [], RouteBuilder $builder)
+  static public function mapRessources($resources = [], RouteBuilder $builder, $prefix = null)
   {
+    $options = ['inflect' => 'dasherize', 'prefix' => $prefix];
+
+    // loop ressources
     foreach($resources as $key => $value)
     {
-      if(is_numeric($key)) $builder->resources($value,['inflect' => 'dasherize']);
-      else $builder->resources($key, self::getNestedRessource($value, $builder, $key));
+      // etract options and resource(s)
+      list($opts, $res) = self::extractOptionsAndRessources($value, $options);
+
+      // if no prefix then set first parent builders
+      if(!$prefix)
+      {
+        if(is_numeric($key)) $builder->resources($res, $opts);
+        else $builder->resources($key, $opts, self::mapRessources($res, $builder, $key));
+      }
+      else // if prefix return function !
+      {
+        return function (RouteBuilder $builder) use($prefix, $key, $opts, $res)
+        {
+          if(is_numeric($key)) $builder->resources($res, $opts);
+          else $builder->resources($key, $opts, self::mapRessources($res, $builder, $prefix.'/'.$key));
+        };
+      }
     }
   }
 
-  static public function getNestedRessource($resources = [], RouteBuilder $builder, $prefix)
+  static public function extractOptionsAndRessources($res, $options = [])
   {
-    //debug($resources);
-    return function (RouteBuilder $builder) use($prefix, $resources)
+    if(!is_array($res)) return [$options, $res];
+
+    $optionKeys = ['id','inflect','only', 'actions', 'map','prefix','connectOptions', 'path'];
+    $resources = [];
+    foreach($res as $key => $value)
     {
-      foreach($resources as $key => $value)
-      {
-        if(is_numeric($key)) $builder->resources($value, ['prefix' => $prefix]);
-        else $builder->resources($key, ['prefix' => $prefix], self::getNestedRessource($value, $builder, $prefix.'/'.$key));
-      }
-    };
+      if(!is_numeric($key) && in_array($key, $optionKeys)) $options[$key] = $value;
+      else $resources[$key] = $value;
+    }
+
+    return [$options, $resources];
   }
 }
