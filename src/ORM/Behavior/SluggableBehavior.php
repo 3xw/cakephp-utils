@@ -95,7 +95,7 @@ class SluggableBehavior extends Behavior
     return $this->_deduplicate_slug($id, $slug, $field, $locale);
   }
 
-  private function _deduplicate_slug($id, $slug, $field, $locale = null)
+  protected function _deduplicate_slug($id, $slug, $field, $locale = null)
   {
     $config = $this->getConfig();
 
