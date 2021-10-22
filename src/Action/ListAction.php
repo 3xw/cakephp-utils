@@ -12,6 +12,7 @@ class ListAction extends BaseAction
     $query = $this->_table()->find($finder, $options);
     $subject = $this->_subject(['success' => true, 'query' => $query]);
 
+    $this->_trigger('beforePaginate', $subject);
     $this->_trigger('beforeFind', $subject);
     try {
       $items = $subject->query->toArray();
