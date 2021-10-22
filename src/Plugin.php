@@ -2,23 +2,25 @@
 namespace Trois\Utils;
 
 use Cake\Core\BasePlugin;
-use Cake\Core\PluginApplicationInterface;
+use Cake\Routing\RouteBuilder;
+use Cake\Console\CommandCollection;
+use Cake\Http\MiddlewareQueue;
 
 class Plugin extends BasePlugin
 {
-  public function middleware($middleware)
+  public function middleware(MiddlewareQueue $middleware): MiddlewareQueue
   {
     // Add middleware here.
     return $middleware;
   }
 
-  public function console($commands)
+  public function console(CommandCollection $commands): CommandCollection
   {
     // Add console commands here.
     return $commands;
   }
 
-  public function routes($routes)
+  public function routes(RouteBuilder $routes): void
   {
     parent::routes($routes);
   }
