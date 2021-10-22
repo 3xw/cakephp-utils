@@ -9,26 +9,33 @@ class Mapper
   {
     $options = ['inflect' => 'dasherize', 'prefix' => $prefix];
 
-    // loop ressources
-    foreach($resources as $key => $value)
+    // LEVEL 0: void
+    if(!$prefix)
     {
-      // etract options and resource(s)
-      list($opts, $res) = self::extractOptionsAndRessources($value, $options);
+      foreach($resources as $key => $value)
+      {
+        // extract options and resource(s)
+        list($opts, $res) = self::extractOptionsAndRessources($value, $options);
 
-      // if no prefix then set first parent builders
-      if(!$prefix)
-      {
-        if(is_numeric($key)) $builder->resources($res, $opts);
-        else $builder->resources($key, $opts, self::mapRessources($res, $builder, $key));
+        // build path for ressource
+        if(is_numeric($key)) $builder->resources($res, $opts); // NO SCOPE
+        else $builder->resources($key, $opts, self::mapRessources($res, $builder, $key)); // SCOPED
       }
-      else // if prefix return function !
+    }
+    else // LEVEL > 0: callable
+    {
+      // extract options and resource(s)
+      list($opts, $res) = self::extractOptionsAndRessources($resources, $options);
+
+      // build path(s) for ressource(s)
+      return function (RouteBuilder $builder) use($prefix, $opts, $res)
       {
-        return function (RouteBuilder $builder) use($prefix, $key, $opts, $res)
+        foreach($res as $key => $r)
         {
-          if(is_numeric($key)) $builder->resources($res, $opts);
-          else $builder->resources($key, $opts, self::mapRessources($res, $builder, $prefix.'/'.$key));
-        };
-      }
+          if(is_numeric($key)) $builder->resources($r, $opts);
+          else $builder->resources($key, $opts, self::mapRessources($r, $builder, $prefix.'/'.$key));
+        }
+      };
     }
   }
 
