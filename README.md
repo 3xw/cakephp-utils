@@ -95,6 +95,17 @@ In src/Application.php
 ## Shell
 
  - MissingTranslations
+ - Token
+
+ ### MissingTranslations
+ ```bash
+ tu_miss_i18n $model, ...$locales
+ ```
+ 
+ ### Token
+ ```bash
+ ut_token username
+ ```
 
 ## View
 
