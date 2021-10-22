@@ -16,8 +16,7 @@ class Plugin extends BasePlugin
 
   public function console(CommandCollection $commands): CommandCollection
   {
-    // Add console commands here.
-    return $commands;
+    return $commands->add('tu_token', \Trois\Utils\Command\TokenCommand::class);
   }
 
   public function routes(RouteBuilder $routes): void
