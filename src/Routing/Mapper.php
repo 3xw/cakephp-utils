@@ -19,7 +19,11 @@ class Mapper
 
         // build path for ressource
         if(is_numeric($key)) $builder->resources($res, $opts); // NO SCOPE
-        else $builder->resources($key, $opts, self::mapRessources($res, $builder, $key)); // SCOPED
+        else
+        {
+          if(is_array($res)) list($opts) = self::extractOptionsAndRessources($res, $opts);
+          $builder->resources($key, $opts, self::mapRessources($res, $builder, $key)); // SCOPED
+        }
       }
     }
     else // LEVEL > 0: callable
@@ -33,11 +37,42 @@ class Mapper
         foreach($res as $key => $r)
         {
           if(is_numeric($key)) $builder->resources($r, $opts);
-          else $builder->resources($key, $opts, self::mapRessources($r, $builder, $prefix.'/'.$key));
+          else
+          {
+            if(is_array($r)) list($opts) = self::extractOptionsAndRessources($r, $opts);
+            $builder->resources($key, $opts, self::mapRessources($r, $builder, $prefix.'/'.$key));
+          }
         }
       };
     }
   }
+  /*
+  static public function mapRessources($resources = [], RouteBuilder $builder, $prefix = null)
+  {
+    // options
+    $options = ['inflect' => 'dasherize', 'prefix' => $prefix];
+    list($options, $resources) = self::extractOptionsAndRessources($resources, $options);
+
+    foreach($resources as $key => $resource)
+    {
+      // simple mapping
+      if(is_string($key))
+      {
+        if(is_array($resource))
+        {
+          list($opts) = self::extractOptionsAndRessources($resource, $options);
+          $builder->resources($key, $opts, self::mapRessources($resource, $builder, $prefix? $prefix.'/'.$key: $key));
+        }
+        else $builder->resources($key, $options);
+      }
+      if(is_numeric($key))
+      {
+        if(is_array($resource)) self::mapRessources($resource, $builder, $prefix? $prefix.'/'.$key: $key);
+        else $builder->resources($resource, $options);
+      }
+    }
+  }
+  */
 
   static public function extractOptionsAndRessources($res, $options = [])
   {
