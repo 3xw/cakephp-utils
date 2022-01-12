@@ -5,7 +5,7 @@ use Cake\Routing\RouteBuilder;
 
 class Mapper
 {
-  static public function mapRessources($resources = [], RouteBuilder $builder, $prefix = null)
+  static public function mapRessources($resources = [], RouteBuilder $builder = null, $prefix = null)
   {
     $options = ['inflect' => 'dasherize', 'prefix' => $prefix];
 
