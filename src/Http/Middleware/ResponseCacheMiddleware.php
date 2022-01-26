@@ -53,8 +53,8 @@ class ResponseCacheMiddleware implements MiddlewareInterface
         throw new Exception(__('Missing configuration file: "config/{0}.php"!!!', $key), 1);
       }
     }
-    $this->config('settings', Configure::read('Trois.cache.settings'));
-    $this->config('rules', Configure::read('Trois.cache.rules'));
+    $this->setConfig('settings', Configure::read('Trois.cache.settings'));
+    $this->setConfig('rules', Configure::read('Trois.cache.rules'));
   }
 
   public function checkRules($request)
@@ -100,10 +100,10 @@ class ResponseCacheMiddleware implements MiddlewareInterface
       }else if(!$rule['clear'] && !$rule['skip']){
         if(is_array($rule['key'])){
           foreach($rule['key'] as $key){
-            $this->_writeCache($key, $response->body(), $rule);
+            $this->_writeCache($key, $response->getBody(), $rule);
           }
         }else{
-          $this->_writeCache($rule['key'], $response->body(), $rule);
+          $this->_writeCache($rule['key'], $response->getBody(), $rule);
         }
       }
     }
@@ -147,10 +147,10 @@ class ResponseCacheMiddleware implements MiddlewareInterface
       switch($key)
       {
         case 'cache':
-          return $this->config('settings')['default'];
+          return $this->get('settings.default');
 
         case 'key':
-          return $request->here();
+          return md5( $request->getUri()->__toString() );
 
         case 'compress':
           return true;
