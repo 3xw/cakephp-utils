@@ -5,12 +5,34 @@ use Cake\Core\BasePlugin;
 use Cake\Routing\RouteBuilder;
 use Cake\Console\CommandCollection;
 use Cake\Http\MiddlewareQueue;
+use Cake\Core\InstanceConfigTrait;
+
+use Trois\Utils\Http\Middleware\ServeCacheResponseMiddleware;
+use Trois\Utils\Http\Middleware\ResponseCacheMiddleware;
 
 class Plugin extends BasePlugin
 {
+  use InstanceConfigTrait;
+
+  protected $_defaultConfig = [
+    'middleware' => [
+      'serveCache' => false,
+      'responseCache' => false,
+    ]
+  ];
+
+  public function __construct(array $options = [])
+  {
+    parent::__construct($options);
+    $this->setConfig($options);
+  }
+
   public function middleware(MiddlewareQueue $middleware): MiddlewareQueue
   {
-    // Add middleware here.
+    // cache
+    if($this->getConfig('middleware.serveCache')) $middleware = $middleware->add(ServeCacheResponseMiddleware::class);
+    if($this->getConfig('middleware.responseCache')) $middleware = $middleware->add(ResponseCacheMiddleware::class);
+
     return $middleware;
   }
 
