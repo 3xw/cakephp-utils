@@ -112,7 +112,7 @@ class ResponseCacheMiddleware implements MiddlewareInterface
   protected function _deleteCache($key, $rule)
   {
     if($key == '*')
-      return Cache::clear(false, $rule['cache']);
+      return Cache::clear($rule['cache']);
 
     Cache::delete($key, $rule['cache']);
   }
