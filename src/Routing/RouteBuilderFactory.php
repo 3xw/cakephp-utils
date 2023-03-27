@@ -12,28 +12,32 @@ class Prefix {
   public $ressources = [];
   public $extensions = [];
 
-  static public function create($key, $config)
+  static public function create($key, $config, $addJsonExtention)
   {
     $prefix = new self();
     $prefix->key = is_string($config)? $config: $key;
-    if(is_string($config)) return $prefix;
-    foreach($config as $key => $value) $prefix->{$key} = $value;
 
+    // merge
+    if(!is_string($config)) foreach($config as $key => $value) $prefix->{$key} = $value;
+    
+    // add Json
+    if($addJsonExtention) $prefix->extensions[] = 'json';
+    
     return $prefix;
   }
 }
 
 class RouteBuilderFactory
 {
-  public static function build($prefixes = [])
+  public static function build($prefixes = [], $addJsonExtention = true)
   {
-    return static function (RouteBuilder $routes) use($prefixes) {
+    return static function (RouteBuilder $routes) use($prefixes, $addJsonExtention) {
 
       $routes->setRouteClass(DashedRoute::class);
     
       foreach($prefixes as $key => $config)
       {
-        $prefix = Prefix::create($key, $config);
+        $prefix = Prefix::create($key, $config, $addJsonExtention);
         $routes->{$prefix->method}($prefix->key, function (RouteBuilder $builder)
         {
     
