@@ -27,7 +27,7 @@ class GuardComponent extends Component
 
   protected $_ruleSettings = [];
 
-  public function initialize(array $config)
+  public function initialize(array $config):void
   {
     parent::initialize($config);
 

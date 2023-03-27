@@ -63,19 +63,19 @@ class HasOneMinMax extends Association {
     parent::attachTo($query, $options);
   }
 
-  public function type()
+  public function type(): string
   {
     return self::ONE_TO_ONE;
   }
 
-  protected function _propertyName()
+  protected function _propertyName(): string
   {
       list(, $name) = pluginSplit($this->_name);
 
       return Inflector::underscore(Inflector::singularize($name));
   }
 
-  public function eagerLoader(array $options)
+  public function eagerLoader(array $options): \Closure
   {
     $loader = new SelectLoader([
       'alias' => $this->getAlias(),
@@ -92,13 +92,13 @@ class HasOneMinMax extends Association {
     return $loader->buildEagerLoader($options);
   }
 
-  public function cascadeDelete(EntityInterface $entity, array $options = [])
+  public function cascadeDelete(EntityInterface $entity, array $options = []): bool
   {
     $helper = new DependentDeleteHelper();
     return $helper->cascadeDelete($this, $entity, $options);
   }
 
-  public function isOwningSide(Table $side)
+  public function isOwningSide(Table $side): bool
   {
     return $side === $this->getSource();
   }
