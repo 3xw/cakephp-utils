@@ -5,7 +5,8 @@ use Cake\Datasource\EntityInterface;
 use Cake\ORM\Table;
 use Cake\ORM\Query;
 use Cake\Utility\Inflector;
-use Cake\ORM\TableRegistry;
+use Cake\Datasource\FactoryLocator;
+
 use RuntimeException;
 
 class BelongsToMinMax extends HasOneMinMax
@@ -51,7 +52,7 @@ class BelongsToMinMax extends HasOneMinMax
       // Join sub query
       $jName = $this->_junctionTableName;
       $jAlias = $this->_joinAlias? $this->_joinAlias: strtoupper(substr($sAlias,0,1).substr($tName,0,1));
-      $jTable = TableRegistry::get($jAlias, ['table' => $jName]);
+      $jTable = FactoryLocator::get('Table')->get($jAlias, ['table' => $jName, 'className' => 'Cake\ORM\Table']);
       $fKey = $this->getForeignKey();
 
       // additionnal join
