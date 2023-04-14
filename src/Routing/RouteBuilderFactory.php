@@ -32,13 +32,13 @@ class RouteBuilderFactory
   public static function build($prefixes = [], $addJsonExtention = true)
   {
     return static function (RouteBuilder $routes) use($prefixes, $addJsonExtention) {
-
+      
       $routes->setRouteClass(DashedRoute::class);
     
       foreach($prefixes as $key => $config)
       {
         $prefix = Prefix::create($key, $config, $addJsonExtention);
-        $routes->{$prefix->method}($prefix->key, function (RouteBuilder $builder)
+        $routes->{$prefix->method}($prefix->key, function (RouteBuilder $builder) use ($prefix)
         {
     
           // Middleware
