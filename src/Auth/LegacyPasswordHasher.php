@@ -13,7 +13,7 @@ class LegacyPasswordHasher extends AbstractPasswordHasher
       return Security::hash($password, 'sha1', true);
     }
 
-    public function check($password, $hashedPassword)
+    public function check($password, $hashedPassword): bool
     {
       return Security::hash($password, 'sha1', true) === $hashedPassword;
     }
