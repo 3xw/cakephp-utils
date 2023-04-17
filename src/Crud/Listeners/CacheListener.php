@@ -25,7 +25,7 @@ class CacheListener extends BaseListener
   function __construct($controller)
   {
     parent::__construct($controller);
-    $controller->Crud->mapAction('serveCache',['className' => 'App\Action\CacheAction']);
+    $controller->Crud->mapAction('serveCache',['className' => '\Trois\Utils\Action\CacheAction']);
     $this->helper = new CacheHelper($this->getConfig());
   }
 
