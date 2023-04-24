@@ -54,7 +54,7 @@ class OpenSsl
       
       if (mb_strlen($iv, '8bit') % mb_strlen($plain, '8bit') == 0) {
           preg_match_all('#([\0]+)$#', $plain, $matches);
-          if (mb_strlen($matches[1][0], '8bit') > 1) {
+          if (!empty($matches[1]) && mb_strlen($matches[1][0], '8bit') > 1) {
             $plain = rtrim($plain, "\0");
             //trigger_error('Detected and stripped null padding. Please double-check results!');
           }
@@ -62,7 +62,6 @@ class OpenSsl
       if ($plain === false) {
         return null;
       }
-
       return $plain;
     }
 }
