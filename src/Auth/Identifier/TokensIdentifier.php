@@ -31,7 +31,7 @@ class TokensIdentifier extends TokenIdentifier
           $user = Cache::read($key, $this->getConfig('cache'));
 
           if(!$user) $user =  $this->getResolver()->find([
-            $dbField => trim($value),
+            $dbField => is_string($value)? trim($value): $value,
           ]);
 
           if($user) Cache::write($key, $user, $this->getConfig('cache'));
