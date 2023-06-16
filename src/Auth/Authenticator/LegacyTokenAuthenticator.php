@@ -22,8 +22,9 @@ class LegacyTokenAuthenticator extends JwtAuthenticator
   protected $_defaultConfig = [
     'key' => '***',
     'salt' => '***',
-    'headerKey' => 'API-TOKEN',
+    'headerKey' => ['API-TOKEN', 'X-API-TOKEN'],
     'subjectKey' => 'username',
+    'returnPayload' => true
   ];
 
   public function __construct(IdentifierInterface $identifier, array $config = [])
@@ -56,15 +57,15 @@ class LegacyTokenAuthenticator extends JwtAuthenticator
       if (empty($result[$subjectKey])) {
           return new Result(null, Result::FAILURE_CREDENTIALS_MISSING);
       }
-
+      
       if ($this->getConfig('returnPayload')) {
           $user = new ArrayObject($result);
 
           return new Result($user, Result::SUCCESS);
       }
-
+      
       $user = $this->_identifier->identify([
-          $subjectKey => $result[$subjectKey],
+          'legacy_token_field' => $result[$subjectKey],
       ]);
       
       if (empty($user)) {
@@ -78,16 +79,18 @@ class LegacyTokenAuthenticator extends JwtAuthenticator
   {
     if (!$request) return $this->payload;
 
-    if($request->getHeader('API-TOKEN') || $request->getHeader('X-API-TOKEN'))
+    foreach( $this->getConfig('headerKey') as $hKey)
     {
+      if(!$cipher = $request->getHeader($hKey)) continue;
+      
       // decipher
-      $cipher = $request->getHeader('API-TOKEN')? $request->getHeader('API-TOKEN'): $request->getHeader('X-API-TOKEN');
       if(empty($cipher)) return $this->payload;
       $cipher = Base64Url::decode($cipher[0]);
+      $subjectKey = $this->getConfig('subjectKey');
       
       Security::engine(new OpenSsl());
-      $username = Security::decrypt($cipher, $this->getConfig('key'), $this->getConfig('salt'));
-      if($username) $this->payload = json_decode(json_encode(['username' => $username]));
+      $decipher = Security::decrypt($cipher, $this->getConfig('key'), $this->getConfig('salt'));
+      if($decipher) $this->payload = json_decode(json_encode([$subjectKey => $decipher]));
     }
     
     return $this->payload;

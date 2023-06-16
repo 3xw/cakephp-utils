@@ -4,40 +4,29 @@ declare(strict_types=1);
 namespace Trois\Utils\Auth\Identifier;
 
 use Authentication\Identifier\TokenIdentifier;
-use Cake\Cache\Cache;
 
 class TokensIdentifier extends TokenIdentifier
 {
 
-    protected $_defaultConfig = [
-      'matching' => [
-        'sub' => 'id',
-        'username' => 'username'
-      ],
-      'resolver' => ['className' => 'Authentication.Orm', 'finder' => 'Auth'],
-      'cache'=> 'token',
-      'prefix' => '_token_'
-    ];
+  protected $_defaultConfig = [
+      'dataField' => 'username',
+      'resolver' => 'Authentication.Orm',
+  ];
 
-    public function identify(array $credentials)
+  public function identify(array $credentials)
+  {
+    $tokenField = 'legacy_token_field';
+    $dataField = $this->getConfig('dataField');
+
+    if (isset($credentials[$tokenField])) 
     {
-      foreach($this->getConfig('matching') as $tokenField => $dbField)
-      {
-        if (isset($credentials[$tokenField])) 
-        {
-          $value = $credentials[$tokenField];
-          $prefix = $this->getConfig('prefix');
-          $key = $prefix.$value;
-          $user = Cache::read($key, $this->getConfig('cache'));
+      $value = $credentials[$tokenField];
+      $user =  $this->getResolver()->find([
+        $dataField => is_string($value)? trim($value): $value,
+      ]);
 
-          if(!$user) $user =  $this->getResolver()->find([
-            $dbField => is_string($value)? trim($value): $value,
-          ]);
-
-          if($user) Cache::write($key, $user, $this->getConfig('cache'));
-          return $user;
-        }
-      }
-      return null;
+      return $user;
     }
+    return null;
+  }
 }
