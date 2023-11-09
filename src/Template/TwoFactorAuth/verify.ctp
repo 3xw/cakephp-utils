@@ -24,12 +24,12 @@ $this->Form->templates([
       </li>
     </ul>
     <ul class="navbar-nav ml-auto">
-      <?   $registrationActive = Configure::read('Users.Registration.active');
+      <?php   $registrationActive = Configure::read('Users.Registration.active');
       if ($registrationActive) : ?>
       <li class="nav-item">
         <?= $this->Html->link(__d('CakeDC/Users', 'S\'inscrire'), ['action' => 'register'],['class' => '']) ?>
       </li>
-    <? endif ?>
+    <?php endif ?>
     <li class="nav-item">
       <?= $this->Html->link(__d('CakeDC/Users', 'Mot de passe oublié'), ['action' => 'request_reset_password'],['class' => '']) ?>
     </li>
