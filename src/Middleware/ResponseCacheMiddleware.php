@@ -1,4 +1,4 @@
-<?
+<?php
 namespace Trois\Utils\Middleware;
 
 use Cake\Cache\Cache;

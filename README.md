@@ -192,7 +192,7 @@ src/Controller/Appcontroller.php
 
 config/auth.php
 
-	<?
+	<?php
 	use Cake\Core\Configure;
 
 	return [
