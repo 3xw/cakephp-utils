@@ -2,6 +2,7 @@
 namespace Trois\Utils\Auth\Storage;
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Cake\Utility\Security;
 use Cake\Cache\Cache;
 use Cake\Core\InstanceConfigTrait;
@@ -81,7 +82,7 @@ class CacheStorage extends MemoryStorage
   {
     $config = $this->_config;
     try {
-      $payload = JWT::decode($token, $this->_config['token']['key'] ?: Security::getSalt(), $this->_config['token']['allowedAlgs']);
+      $payload = JWT::decode($token, new Key($this->_config['token']['key'] ?: Security::getSalt(), $this->_config['token']['allowedAlgs']));
       return $payload;
     } catch (ExpiredException $e) {
       throw new UnauthorizedException($e->getMessage());

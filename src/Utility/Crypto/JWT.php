@@ -5,18 +5,19 @@ use Cake\Utility\Security;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 use Firebase\JWT\JWT as FJWT;
+use Firebase\JWT\Key;
 
 class JWT {
 
   public static function encode(array $token, $salt = null)
   {
-    return FJWT::encode($token, $salt? $salt: Security::getSalt());
+    return FJWT::encode($token, $salt? $salt: Security::getSalt(), 'HS256');
   }
 
   public static function decode($token, $salt = null, $allowedAlgs = ['HS256'])
   {
     try {
-      $decoded = FJWT::decode($token, $salt? $salt: Security::getSalt(), $allowedAlgs);
+      $decoded = FJWT::decode($token, new Key($salt? $salt: Security::getSalt(), $allowedAlgs));
     } catch (ExpiredException $e) {
       throw new \Exception("Token expired", 1);
     } catch (SignatureInvalidException $e) {

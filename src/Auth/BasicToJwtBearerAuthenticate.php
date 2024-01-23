@@ -30,7 +30,7 @@ class BasicToJwtBearerAuthenticate extends CakeBasicAuthenticate
 
   public function afterIdentify(Event $event, array $user)
   {
-    $token = JWT::encode(['sub' => $user[$this->getConfig('field')], 'exp' =>  time() + $this->getConfig('duration')], Security::getSalt());
+    $token = JWT::encode(['sub' => $user[$this->getConfig('field')], 'exp' =>  time() + $this->getConfig('duration')], Security::getSalt(), 'HS256');
     $event->getSubject()->response = $event->getSubject()->response->withHeader($this->getConfig('headerKey'), $token);
     $event->result = $user;
   }

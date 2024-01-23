@@ -11,6 +11,7 @@ use Cake\Http\ServerRequest;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Cake\Http\Exception\UnauthorizedException;
 
 class JwtBearerAuthenticate extends CakeBasicAuthenticate
@@ -106,7 +107,7 @@ class JwtBearerAuthenticate extends CakeBasicAuthenticate
   {
     $config = $this->_config;
     try {
-      $payload = JWT::decode($token, $config['key'] ?: Security::getSalt(), $config['allowedAlgs']);
+      $payload = JWT::decode($token, new Key($config['key'] ?: Security::getSalt(), $config['allowedAlgs']));
 
       return $payload;
     } catch (ExpiredException $e) {
