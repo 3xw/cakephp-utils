@@ -5,6 +5,7 @@
   "require": {
     "php": ">=5.5.9",
     "cakephp/cakephp": "^3.5",
+    "google/apiclient": "^2.14",
     "firebase/php-jwt": "~6.0",
     "raiym/instagram-php-scraper": "^0.10.0"
   },
