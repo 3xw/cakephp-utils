@@ -2,7 +2,6 @@
 namespace Trois\Utils\Auth;
 
 use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
 use Cake\Controller\ComponentRegistry;
@@ -83,7 +82,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
   {
     $config = $this->_config;
     try {
-      $payload = JWT::decode($token, new Key(Security::salt(), $this->getConfig('token.allowedAlgs')));
+      $payload = JWT::decode($token, Security::salt(), $this->getConfig('token.allowedAlgs'));
       return $payload;
     } catch (ExpiredException $e) {
       $this->_registry->getController()->Flash->error($e->getMessage());
@@ -126,7 +125,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
 
       // create code + token
       $this->genCode();
-      $this->token = JWT::encode(['username' => $user[$this->getConfig('fields.username')],'code' => $hasher->hash($this->code),'exp' =>  time() + $this->getConfig('token.duration')], Security::salt(), 'HS256');
+      $this->token = JWT::encode(['username' => $user[$this->getConfig('fields.username')],'code' => $hasher->hash($this->code),'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
 
       // transmit
       $transmitted = $this->_transmit($this->code, $user, $request, $response);
@@ -169,7 +168,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
       if (!$hasher->check($password, $payload->code)) return false;
 
       // set Bearer token for BearerTokenAuth
-      $this->token = JWT::encode(['sub' => $user[$this->getConfig('token.sub')],'exp' =>  time() + $this->getConfig('token.duration')], Security::salt(), 'HS256');
+      $this->token = JWT::encode(['sub' => $user[$this->getConfig('token.sub')],'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
 
       // if no cookie then pass token as an argument
       if($this->_registry->getController()->Auth->getConfig('storage') != 'Session')
