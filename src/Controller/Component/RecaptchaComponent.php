@@ -9,7 +9,7 @@ use ReCaptcha\Response;
 
 class RecaptchaComponent extends Component
 {
-  protected $_defaultConfig = [];
+  protected array $_defaultConfig = [];
 
   protected $recaptcha = null;
 

@@ -11,7 +11,7 @@ class CorsMiddleware implements MiddlewareInterface
 {
   use InstanceConfigTrait;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'all' => [
       'Access-Control-Allow-Origin' => '*',
       'Access-Control-Allow-Credentials' => 'true',

@@ -19,7 +19,7 @@ class ResponseCacheMiddleware implements MiddlewareInterface
 {
   use InstanceConfigTrait;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
       'settings' => [],
       'rules' => [],
   ];

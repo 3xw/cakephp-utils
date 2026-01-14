@@ -21,7 +21,7 @@ class JwtBearerAuthenticate extends CakeBasicAuthenticate
 
   protected $_error;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'fields' => [
         'username' => 'id',
         'password' => 'password'

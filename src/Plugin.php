@@ -14,7 +14,7 @@ class Plugin extends BasePlugin
 {
   use InstanceConfigTrait;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'middleware' => [
       'serveCache' => false,
       'responseCache' => false,
@@ -39,7 +39,7 @@ class Plugin extends BasePlugin
   public function console(CommandCollection $commands): CommandCollection
   {
     return $commands
-    ->add('tu_miss_i18n', \Trois\Utils\Shell\MissingTranslationsShell::class)
+    ->add('tu_miss_i18n', \Trois\Utils\Command\MissingTranslationsCommand::class)
     ->add('tu_token', \Trois\Utils\Command\TokenCommand::class);
   }
 

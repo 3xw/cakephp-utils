@@ -11,7 +11,7 @@ use Cake\Auth\BaseAuthenticate;
 
 class LegacyTokenAuthenticate extends BaseAuthenticate
 {
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'key' => '***',
     'salt' => '***',
     'fields' => [

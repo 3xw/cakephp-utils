@@ -8,7 +8,7 @@ use Cake\Mailer\Email;
 class EmailCodeTransmitter extends AbstractCodeTransmitter
 {
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'messages' => [
       'success' => 'An email with a two-factor authentication code has been tramsitted to you. Please find it and paste it here in order to finish the sign up process.',
       'error' => 'The app was not able to tramsit your an emial with your two-factor authentication code. Please try again.'

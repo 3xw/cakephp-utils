@@ -8,7 +8,7 @@ use Authentication\Identifier\TokenIdentifier;
 class TokensIdentifier extends TokenIdentifier
 {
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
       'dataField' => 'username',
       'resolver' => 'Authentication.Orm',
   ];

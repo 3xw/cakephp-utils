@@ -9,7 +9,7 @@ use Cake\Utility\Hash;
 
 class SnsMessage extends Entity
 {
-  protected $_accessible = [
+  protected array $_accessible = [
     '*' => true,
   ];
 

@@ -15,7 +15,7 @@ class ModifyConfigureMiddleware implements MiddlewareInterface
 {
   use InstanceConfigTrait;
 
-  protected $_defaultConfig = [];
+  protected array $_defaultConfig = [];
 
   public function __construct(array $config = [])
   {

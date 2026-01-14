@@ -11,7 +11,7 @@ class DtoListener extends BaseListener
 {
   use \Trois\Utils\Dto\DtoTrait;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'actionsDtos' => []
   ];
 

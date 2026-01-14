@@ -21,7 +21,7 @@ class SluggableBehavior extends Behavior
   *
   * @var array
   */
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'field' => 'title',
     'fields' => [],
     'slug' => 'slug',

@@ -14,7 +14,7 @@ class GuardComponent extends Component
 {
   public $components = ['Auth'];
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     // autoload permissions based on a configuration
     'autoload_configs' => [
       'Guard.requestBody' => 'guard_request_body'

@@ -8,7 +8,7 @@ class BaseListener implements ListenerInterface
 {
   use InstanceConfigTrait;
 
-  protected $_defaultConfig = [  ];
+  protected array $_defaultConfig = [  ];
 
   public function __construct($config = [])
   {

@@ -9,7 +9,7 @@ abstract class AbstractCodeTransmitter
 {
   use InstanceConfigTrait;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'messages' => [
       'success' => 'A two-factor authentication code has been tramsitted to you. Please find it and paste it here in order to finish the sign up process.',
       'error' => 'The app was not able to tramsit your two-factor authentication code. Please try again.'

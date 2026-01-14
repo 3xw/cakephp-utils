@@ -17,7 +17,7 @@ class ClusterAliasMiddleware implements MiddlewareInterface
 {
   use InstanceConfigTrait;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'rules' => [
       [ // here we always use "reader" instead of "default" connection
         'slave' => true,

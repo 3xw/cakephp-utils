@@ -1,15 +1,22 @@
 <?php
+declare(strict_types=1);
+
+use Cake\Routing\Route\DashedRoute;
 use Cake\Routing\RouteBuilder;
-use Cake\Routing\Router;
 
-// set plugin stuff : )
-Router::plugin('Trois/Utils',['path' => '/utils'],function (RouteBuilder $routes){
-  $routes->fallbacks('DashedRoute');
-});
+return function (RouteBuilder $routes): void {
+    $routes->plugin(
+        'Trois/Utils',
+        ['path' => '/utils'],
+        function (RouteBuilder $builder): void {
+            $builder->fallbacks(DashedRoute::class);
+        }
+    );
 
-Router::connect('/auth/two-factor', [
-  'prefix' => false,
-  'controller' => 'TwoFactorAuth',
-  'action' => 'verify',
-  'plugin' => 'Trois/Utils',
-]);
+    $routes->connect('/auth/two-factor', [
+        'prefix' => null,
+        'controller' => 'TwoFactorAuth',
+        'action' => 'verify',
+        'plugin' => 'Trois/Utils',
+    ]);
+};

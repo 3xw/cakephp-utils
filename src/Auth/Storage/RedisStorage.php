@@ -13,7 +13,7 @@ class RedisStorage extends MemoryStorage
 {
   use InstanceConfigTrait;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'token' => [
       'header' => 'authorization',
       'prefix' => 'bearer',

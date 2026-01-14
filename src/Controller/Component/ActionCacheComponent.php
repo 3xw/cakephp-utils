@@ -16,7 +16,7 @@ class ActionCacheComponent extends Component
 {
   protected $_controller;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'skip_debug' => true
   ];
 

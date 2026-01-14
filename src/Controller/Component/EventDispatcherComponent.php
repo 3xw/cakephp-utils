@@ -16,7 +16,7 @@ class EventDispatcherComponent extends Component
 {
   use EventDispatcherTrait;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'listeners' => []
   ];
 

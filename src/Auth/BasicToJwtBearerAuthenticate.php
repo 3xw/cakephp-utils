@@ -12,7 +12,7 @@ use Cake\Auth\BasicAuthenticate AS CakeBasicAuthenticate;
 
 class BasicToJwtBearerAuthenticate extends CakeBasicAuthenticate
 {
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'fields' => [
         'username' => 'username',
         'password' => 'password'

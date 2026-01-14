@@ -16,7 +16,7 @@ class CacheStorage extends MemoryStorage
 {
   use InstanceConfigTrait;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'cache' => 'default',
     'prefix' => 'token:',
     'field' => 'id',

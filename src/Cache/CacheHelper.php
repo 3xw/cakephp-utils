@@ -9,7 +9,7 @@ class CacheHelper
 {
   use InstanceConfigTrait;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'cache' => 'queries',
   ];
 

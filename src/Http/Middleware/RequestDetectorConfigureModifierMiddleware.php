@@ -14,7 +14,7 @@ class RequestDetectorConfigureModifierMiddleware implements MiddlewareInterface
 {
   use InstanceConfigTrait;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'json' => [
       'detector' => null, // or https://book.cakephp.org/4/en/controllers/request-response.html#checking-request-conditions
       'configFile' => null,

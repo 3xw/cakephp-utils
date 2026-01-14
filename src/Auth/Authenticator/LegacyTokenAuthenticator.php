@@ -19,7 +19,7 @@ use App\Auth\Identifier\LegacyIdentifier;
 
 class LegacyTokenAuthenticator extends JwtAuthenticator
 {
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'key' => '***',
     'salt' => '***',
     'headerKey' => ['API-TOKEN', 'X-API-TOKEN'],

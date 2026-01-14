@@ -12,7 +12,7 @@ use Trois\Utils\Cache\CacheHelper;
 
 class CacheListener extends BaseListener
 {
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'cache' => 'queries',
     'actions' => ['index','view']
   ];

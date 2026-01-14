@@ -20,7 +20,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
   /** @var AbstractCodeTransmitter */
   protected $_transmitter;
 
-  protected $_defaultConfig = [
+  protected array $_defaultConfig = [
     'transmitter' => [
       'class' => '\Trois\Utils\Auth\TwoFactor\EmailCodeTransmitter',
       'config' => []
