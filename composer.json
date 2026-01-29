@@ -5,7 +5,7 @@
   "require": {
     "php": ">=8.2",
     "cakephp/cakephp": "^5.0",
-    "firebase/php-jwt": "^5.0"
+    "firebase/php-jwt": "^7.0"
   },
   "require-dev": {
     "phpunit/phpunit": "*"

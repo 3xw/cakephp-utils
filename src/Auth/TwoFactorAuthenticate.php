@@ -2,18 +2,20 @@
 namespace Trois\Utils\Auth;
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\SignatureInvalidException;
-use Cake\Controller\ComponentRegistry;
+
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
-use Cake\Event\Event;
 use Cake\Utility\Security;
-use Cake\Http\Exception\UnauthorizedException;
 use Cake\Auth\FormAuthenticate;
 use Cake\Routing\Router;
-use Trois\Utils\Auth\TwoFactor\EmailCodeTransmitter\AbstractCodeTransmitter;
+use Cake\Network\Request;
+use Cake\Http\Exception\UnauthorizedException;
 use Cake\Auth\PasswordHasherFactory;
+
+use Trois\Utils\Auth\TwoFactor\EmailCodeTransmitter\AbstractCodeTransmitter;
 
 class TwoFactorAuthenticate extends FormAuthenticate
 {
@@ -54,14 +56,13 @@ class TwoFactorAuthenticate extends FormAuthenticate
   ];
 
   public $code;
-
   public $token;
 
   public function genCode()
   {
     $this->code = '';
     $count = 0;
-    while ( $count < $this->getConfig('code.length') ) {
+    while ($count < $this->getConfig('code.length')) {
       $digit = mt_rand(0, 9);
       $this->code .= $digit;
       $count++;
@@ -73,24 +74,49 @@ class TwoFactorAuthenticate extends FormAuthenticate
   {
     foreach ($fields as $field) {
       $value = $request->getData($field);
-      if (empty($value) || !is_string($value)) return false;
+      if (empty($value) || !is_string($value)) {
+        return false;
+      }
     }
     return true;
   }
 
+  /**
+   * CakePHP 3 uses Security::salt()
+   * CakePHP 4+ uses Security::getSalt()
+   */
+  protected function _getJwtKey(): string
+  {
+    if (method_exists(Security::class, 'salt')) {
+      return (string) Security::salt();
+    }
+    return (string) Security::getSalt();
+  }
+
+  protected function _getJwtAlg(): string
+  {
+    $algs = (array) $this->getConfig('token.allowedAlgs');
+    return $algs[0] ?? 'HS256';
+  }
+
   protected function _decode($token)
   {
-    $config = $this->_config;
     try {
-      $payload = JWT::decode($token, Security::salt(), $this->getConfig('token.allowedAlgs'));
-      return $payload;
+      $key = $this->_getJwtKey();
+      $alg = $this->_getJwtAlg();
+
+      // firebase/php-jwt v6/v7
+      return JWT::decode($token, new Key($key, $alg));
     } catch (ExpiredException $e) {
       $this->_registry->getController()->Flash->error($e->getMessage());
       return false;
-    }catch (SignatureInvalidException $e) {
+    } catch (SignatureInvalidException $e) {
       $this->_registry->getController()->Flash->error($e->getMessage());
       return false;
-    }catch (\DomainException $e) {
+    } catch (\DomainException $e) {
+      $this->_registry->getController()->Flash->error($e->getMessage());
+      return false;
+    } catch (\UnexpectedValueException $e) {
       $this->_registry->getController()->Flash->error($e->getMessage());
       return false;
     }
@@ -106,31 +132,48 @@ class TwoFactorAuthenticate extends FormAuthenticate
   public function authenticate(ServerRequest $request, Response $response)
   {
     // look for form auth fields
-    $formAuth = $this->_checkFields($request, $this->getConfig('fields'));
+    $formAuth = $this->_checkFields($request, (array) $this->getConfig('fields'));
 
     // look for token auth fields
     $tokenCodeAuth = $this->_checkFields($request, ['code']);
 
     // if none
-    if(!$formAuth && !$tokenCodeAuth) return false;
+    if (!$formAuth && !$tokenCodeAuth) {
+      return false;
+    }
 
     // construct hasher
     $hasher = PasswordHasherFactory::build($this->getConfig('code.passwordHasher'));
 
     // form Auth
-    if($formAuth)
-    {
+    if ($formAuth) {
       // find and test user
-      if(!$user = $this->_findUser($request->getData($this->getConfig('fields.username')),$request->getData($this->getConfig('fields.password')))) return false;
+      $usernameField = $this->getConfig('fields.username');
+      $passwordField = $this->getConfig('fields.password');
+
+      $username = $request->getData($usernameField);
+      $password = $request->getData($passwordField);
+
+      if (!$user = $this->_findUser($username, $password)) {
+        return false;
+      }
 
       // create code + token
       $this->genCode();
-      $this->token = JWT::encode(['username' => $user[$this->getConfig('fields.username')],'code' => $hasher->hash($this->code),'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
+
+      $this->token = JWT::encode(
+        [
+          'username' => $user[$usernameField],
+          'code' => $hasher->hash($this->code),
+          'exp' => time() + (int) $this->getConfig('token.duration'),
+        ],
+        $this->_getJwtKey(),
+        $this->_getJwtAlg()
+      );
 
       // transmit
       $transmitted = $this->_transmit($this->code, $user, $request, $response);
-      if(!$transmitted)
-      {
+      if (!$transmitted) {
         $this->_registry->getController()->Auth->config('authError', $this->_transmitter->getConfig('messages.error'));
         return false;
       }
@@ -139,7 +182,7 @@ class TwoFactorAuthenticate extends FormAuthenticate
       $this->_registry->getController()->Flash->success($this->_transmitter->getConfig('messages.success'));
       $response = $response->withLocation(Router::url($this->getConfig('verifyAction'), true));
       $this->_registry->getController()->setResponse($response);
-      $this->_registry->getController()->Auth->config('storage','Memory');
+      $this->_registry->getController()->Auth->config('storage', 'Memory');
 
       // set session challenge
       $request->getSession()->write('TwoFactorAuthenticate.token', $this->token);
@@ -149,33 +192,55 @@ class TwoFactorAuthenticate extends FormAuthenticate
     }
 
     // token + code Auth
-    if($tokenCodeAuth)
-    {
+    if ($tokenCodeAuth) {
       // read token
       $token = $request->getSession()->read('TwoFactorAuthenticate.token');
-      if(empty($token)) return false;
-      if(!$payload = $this->_decode($request->getSession()->read('TwoFactorAuthenticate.token'))) return false;
+      if (empty($token)) {
+        return false;
+      }
+
+      $payload = $this->_decode($token);
+      if (!$payload) {
+        return false;
+      }
 
       // look for user
-      if (!$user = $this->_query($payload->username)->first()) return false;
+      if (!$user = $this->_query($payload->username)->first()) {
+        return false;
+      }
       $user = $user->toArray();
 
       $request->getSession()->delete('TwoFactorAuthenticate.token');
 
-
       // test code
       $password = $request->getData('code');
-      if (!$hasher->check($password, $payload->code)) return false;
+      if (!$hasher->check($password, $payload->code)) {
+        return false;
+      }
 
       // set Bearer token for BearerTokenAuth
-      $this->token = JWT::encode(['sub' => $user[$this->getConfig('token.sub')],'exp' =>  time() + $this->getConfig('token.duration')], Security::salt());
+      $this->token = JWT::encode(
+        [
+          'sub' => $user[$this->getConfig('token.sub')],
+          'exp' => time() + (int) $this->getConfig('token.duration'),
+        ],
+        $this->_getJwtKey(),
+        $this->_getJwtAlg()
+      );
 
       // if no cookie then pass token as an argument
-      if($this->_registry->getController()->Auth->getConfig('storage') != 'Session')
-        $this->_registry->getController()->Auth->config('loginRedirect',$this->_registry->getController()->Auth->config('loginRedirect')+['?' => [$this->getConfig('token.parameter') => $this->token]]);
+      if ($this->_registry->getController()->Auth->getConfig('storage') != 'Session') {
+        $this->_registry->getController()->Auth->config(
+          'loginRedirect',
+          $this->_registry->getController()->Auth->config('loginRedirect') + [
+            '?' => [$this->getConfig('token.parameter') => $this->token]
+          ]
+        );
+      }
 
+      return $user;
     }
 
-    return $user;
+    return false;
   }
 }
